@@ -1,0 +1,24 @@
+@if (tile.href) {
+  <a [href]="tile.href" target="_blank" rel="noopener" class="card card-sm">
+    <ng-container *ngTemplateOutlet="body"></ng-container>
+  </a>
+} @else {
+  <div class="card card-sm">
+    <ng-container *ngTemplateOutlet="body"></ng-container>
+  </div>
+}
+
+<ng-template #body>
+  <div class="card-body d-flex align-items-center gap-3">
+    @if (tile.logo_url) {
+      <span class="avatar avatar-md bg-white">
+        <img [src]="tile.logo_url" alt="" class="logo-img" />
+      </span>
+    } @else {
+      <span class="avatar avatar-md" [class]="avatarColorClass">{{ initials }}</span>
+    }
+    <div class="flex-fill" style="min-width: 0">
+      <div class="fw-bold text-truncate">{{ tile.name }}</div>
+    </div>
+  </div>
+</ng-template>

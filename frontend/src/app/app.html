@@ -1,0 +1,27 @@
+@if (auth.user(); as user) {
+  <div class="navbar navbar-expand-md navbar-dark d-print-none">
+    <div class="container-xl">
+      <a class="navbar-brand d-flex align-items-center gap-2" routerLink="/">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <polygon points="12,2.3 16.5,4.9 16.5,10.1 12,12.7 7.5,10.1 7.5,4.9" fill="#f59f00"/>
+          <polygon points="7,11.3 11.5,13.9 11.5,19.1 7,21.7 2.5,19.1 2.5,13.9" fill="#f59f00" fill-opacity="0.55"/>
+          <polygon points="17,11.3 21.5,13.9 21.5,19.1 17,21.7 12.5,19.1 12.5,13.9" fill="#f59f00" fill-opacity="0.55"/>
+        </svg>
+        HiveDash
+      </a>
+      <div class="navbar-nav flex-row order-md-last align-items-center">
+        @if (auth.isAdmin()) {
+          <a class="nav-link me-3" routerLink="/admin" routerLinkActive="active">
+            <i class="ti ti-settings me-1"></i>Einstellungen
+          </a>
+        }
+        <span class="text-secondary me-3">{{ user.display_name || user.email }}</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="logout()">
+          Abmelden
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<router-outlet></router-outlet>

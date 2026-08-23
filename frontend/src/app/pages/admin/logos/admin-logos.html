@@ -1,0 +1,126 @@
+@if (error()) {
+  <div class="alert alert-danger">{{ error() }}</div>
+}
+
+<div class="row row-cards mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><h3 class="card-title">Aus Katalog importieren</h3></div>
+      <div class="card-body">
+        <p class="text-secondary small">
+          Durchsucht <a href="https://github.com/homarr-labs/dashboard-icons" target="_blank" rel="noopener">dashboard-icons</a>
+          (Apache-2.0) nach passenden Icons für bekannte Self-Hosted-Apps.
+        </p>
+        <form class="input-group mb-3" (ngSubmit)="searchCatalog()">
+          <input
+            class="form-control"
+            name="catalogQuery"
+            [(ngModel)]="catalogQuery"
+            placeholder="z. B. plex, sonarr, proxmox"
+          />
+          <button class="btn btn-outline-secondary" type="submit" [disabled]="searching()">
+            <i class="ti ti-search"></i>
+          </button>
+        </form>
+
+        <div class="row g-2">
+          @for (result of catalogResults(); track result.slug) {
+            <div class="col-4 col-md-3 text-center">
+              <div class="border rounded p-2">
+                <span class="avatar avatar-md bg-white mb-1">
+                  <img [src]="result.preview_url" [alt]="result.slug" class="logo-img" />
+                </span>
+                <div class="small text-truncate">{{ result.slug }}</div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary w-100 mt-1"
+                  (click)="importFromCatalog(result)"
+                  [disabled]="importingSlug() === result.slug"
+                >
+                  @if (importingSlug() === result.slug) {
+                    <span class="spinner-border spinner-border-sm"></span>
+                  } @else {
+                    Import
+                  }
+                </button>
+              </div>
+            </div>
+          } @empty {
+            @if (catalogQuery && !searching()) {
+              <div class="col text-secondary small">Keine Treffer.</div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><h3 class="card-title">Eigenes Logo hochladen</h3></div>
+      <div class="card-body">
+        <form (ngSubmit)="upload()">
+          <div class="mb-2">
+            <label class="form-label">Name</label>
+            <input class="form-control" name="uploadName" [(ngModel)]="uploadName" required />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Stichwörter (kommagetrennt)</label>
+            <input
+              class="form-control"
+              name="uploadKeywords"
+              [(ngModel)]="uploadKeywords"
+              placeholder="z. B. plex, plexmediaserver"
+            />
+            <div class="form-hint">
+              Wird für die automatische Zuordnung zu Domains/Namen verwendet.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Bilddatei</label>
+            <input class="form-control" type="file" accept="image/*" (change)="onFileSelected($event)" required />
+          </div>
+          <button class="btn btn-primary" type="submit" [disabled]="uploading() || !uploadFile">
+            Hochladen
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><h3 class="card-title">Logo-Bibliothek ({{ logos().length }})</h3></div>
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Stichwörter</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (logo of logos(); track logo.id) {
+          <tr>
+            <td>
+              <span class="avatar avatar-sm bg-white">
+                <img [src]="logoImageUrl(logo)" [alt]="logo.name" class="logo-img" />
+              </span>
+            </td>
+            <td>{{ logo.name }}</td>
+            <td class="text-secondary">{{ logo.keywords.join(', ') || '—' }}</td>
+            <td class="text-end">
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteLogo(logo)">
+                <i class="ti ti-trash"></i>
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="text-secondary">Noch keine Logos hinterlegt.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

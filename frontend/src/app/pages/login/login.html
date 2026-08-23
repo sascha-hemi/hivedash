@@ -1,0 +1,55 @@
+<div class="page page-center">
+  <div class="container container-tight py-4">
+    <div class="text-center mb-4">
+      <span class="navbar-brand navbar-brand-autodark">HiveDash</span>
+    </div>
+    <form class="card card-md" (ngSubmit)="submit()" novalidate>
+      <div class="card-body">
+        <h2 class="h2 text-center mb-4">Anmelden</h2>
+
+        @if (error()) {
+          <div class="alert alert-danger" role="alert">{{ error() }}</div>
+        }
+
+        <div class="mb-3">
+          <label class="form-label">E-Mail</label>
+          <input
+            type="email"
+            class="form-control"
+            name="email"
+            [(ngModel)]="email"
+            autocomplete="username"
+            required
+          />
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Passwort</label>
+          <input
+            type="password"
+            class="form-control"
+            name="password"
+            [(ngModel)]="password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <div class="form-footer">
+          <button type="submit" class="btn btn-primary w-100" [disabled]="submitting()">
+            @if (submitting()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            Anmelden
+          </button>
+        </div>
+
+        @if (oidcEnabled()) {
+          <div class="hr-text">oder</div>
+          <button type="button" class="btn btn-outline-secondary w-100" (click)="loginWithOidc()">
+            <i class="ti ti-shield-lock me-2"></i>
+            Mit SSO anmelden
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,73 @@
+@if (error()) {
+  <div class="alert alert-danger">{{ error() }}</div>
+}
+
+<div class="card mb-4">
+        <div class="card-header">
+          <h3 class="card-title">Neues Dashboard anlegen</h3>
+        </div>
+        <div class="card-body">
+          <p class="text-secondary">
+            Startet als Kopie des aktuellen Standard-Dashboards - neue Dienste erscheinen darauf
+            danach nicht mehr automatisch, sondern müssen hier bewusst hinzugefügt werden.
+          </p>
+          <form class="row g-2 align-items-end" (ngSubmit)="create()">
+            <div class="col-md-4">
+              <label class="form-label">Name</label>
+              <input
+                class="form-control"
+                name="newName"
+                [(ngModel)]="newName"
+                placeholder="z. B. Gäste-Ansicht"
+                required
+              />
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary w-100" type="submit" [disabled]="creating()">
+                Anlegen
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table card-table table-vcenter">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Standard</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of dashboards(); track d.id) {
+                <tr>
+                  <td><a [routerLink]="['/admin/dashboards', d.id]">{{ d.name }}</a></td>
+                  <td>
+                    @if (d.is_default) {
+                      <span class="badge bg-green-lt">Standard</span>
+                    } @else {
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        (click)="setDefault(d)"
+                      >
+                        Als Standard setzen
+                      </button>
+                    }
+                  </td>
+                  <td class="text-end">
+                    @if (!d.is_default) {
+                      <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(d)">
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>

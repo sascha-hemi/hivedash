@@ -1,0 +1,46 @@
+@if (tile.href) {
+  <a [href]="tile.href" target="_blank" rel="noopener" class="card card-sm">
+    <ng-container *ngTemplateOutlet="body"></ng-container>
+  </a>
+} @else {
+  <div class="card card-sm">
+    <ng-container *ngTemplateOutlet="body"></ng-container>
+  </div>
+}
+
+<ng-template #body>
+  <div class="card-body d-flex align-items-center gap-3">
+    @if (tile.logo_url) {
+      <span class="avatar avatar-md bg-white">
+        <img [src]="tile.logo_url" alt="" class="logo-img" />
+      </span>
+    } @else {
+      <span class="avatar avatar-md" [class]="avatarColorClass">{{ initials }}</span>
+    }
+    <div class="flex-fill" style="min-width: 0">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="fw-bold text-truncate">{{ tile.name }}</div>
+        <span class="status-dot ms-2" [class]="dotClass" [title]="tile.status"></span>
+      </div>
+      <div class="text-secondary small text-truncate">
+        <span class="badge" [class.bg-purple-lt]="tile.kind === 'qemu'" [class.bg-yellow-lt]="tile.kind === 'lxc'">
+          {{ kindLabel }}
+        </span>
+        #{{ tile.vmid }} auf {{ tile.node }}
+        @if (firstIp) {
+          · {{ firstIp }}
+        }
+      </div>
+      @if (cpuPercent != null || memLabel != null) {
+        <div class="d-flex gap-3 small text-secondary mt-1">
+          @if (cpuPercent != null) {
+            <span>CPU {{ cpuPercent }}%</span>
+          }
+          @if (memLabel != null) {
+            <span>RAM {{ memLabel }}</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</ng-template>

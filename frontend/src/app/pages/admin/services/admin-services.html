@@ -1,0 +1,171 @@
+@if (error()) {
+  <div class="alert alert-danger">{{ error() }}</div>
+}
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h3 class="card-title">Automatisch erkannte Dienste</h3>
+    <span class="text-secondary small">Logo, Name und URL gelten dashboardübergreifend.</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table">
+      <thead>
+        <tr>
+          <th>Typ</th>
+          <th>Erkannt als</th>
+          <th>Logo</th>
+          <th>Eigener Name</th>
+          <th>Eigene URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (service of discovered(); track service.kind + service.id) {
+          <tr>
+            <td>
+              <span
+                class="badge"
+                [class.bg-blue-lt]="service.kind === 'proxy_host' && !service.secondary_label"
+                [class.bg-yellow-lt]="service.kind === 'guest'"
+                [class.bg-purple-lt]="!!service.secondary_label"
+              >
+                {{ badgeLabel(service) }}
+              </span>
+            </td>
+            <td class="text-secondary">
+              {{ service.label }}
+              @if (service.secondary_label) {
+                <div class="text-secondary small">↔ {{ service.secondary_label }}</div>
+              }
+            </td>
+            <td>
+              <select
+                class="form-select form-select-sm"
+                style="min-width: 150px"
+                [ngModel]="service.logo_id ?? ''"
+                (ngModelChange)="setDiscoveredLogo(service, $event)"
+              >
+                <option value="">kein Logo</option>
+                @for (logo of logos(); track logo.id) {
+                  <option [value]="logo.id">{{ logo.name }}</option>
+                }
+              </select>
+            </td>
+            <td>
+              <input
+                class="form-control form-control-sm"
+                placeholder="wie erkannt"
+                [ngModel]="service.custom_name"
+                (change)="setDiscoveredName(service, $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control form-control-sm"
+                placeholder="https://…"
+                [ngModel]="service.custom_url"
+                (change)="setDiscoveredUrl(service, $any($event.target).value)"
+              />
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="text-secondary">Noch keine Dienste erkannt.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><h3 class="card-title">Neuer eigener Dienst</h3></div>
+  <div class="card-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Name</label>
+        <input class="form-control" [(ngModel)]="newName" placeholder="z. B. Fritzbox" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">URL</label>
+        <input class="form-control" [(ngModel)]="newUrl" placeholder="http://192.168.1.1" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Logo</label>
+        <select class="form-select" [(ngModel)]="newLogoId">
+          <option [ngValue]="null">kein Logo</option>
+          @for (logo of logos(); track logo.id) {
+            <option [ngValue]="logo.id">{{ logo.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-1">
+        <button
+          type="button"
+          class="btn btn-primary w-100"
+          (click)="createCustomService()"
+          [disabled]="creating() || !newName.trim()"
+        >
+          <i class="ti ti-plus"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Eigene Dienste</h3>
+    <span class="text-secondary small">Dienste ohne NPM- oder Proxmox-Gegenstück.</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>URL</th>
+          <th>Logo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (service of customServices(); track service.id) {
+          <tr>
+            <td>
+              <input
+                class="form-control form-control-sm"
+                [ngModel]="service.name"
+                (change)="setCustomName(service, $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control form-control-sm"
+                placeholder="https://…"
+                [ngModel]="service.url"
+                (change)="setCustomUrl(service, $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <select
+                class="form-select form-select-sm"
+                style="min-width: 150px"
+                [ngModel]="service.logo_id ?? ''"
+                (ngModelChange)="setCustomLogo(service, $event)"
+              >
+                <option value="">kein Logo</option>
+                @for (logo of logos(); track logo.id) {
+                  <option [value]="logo.id">{{ logo.name }}</option>
+                }
+              </select>
+            </td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteCustomService(service)">
+                <i class="ti ti-trash"></i>
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="text-secondary">Noch keine eigenen Dienste angelegt.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

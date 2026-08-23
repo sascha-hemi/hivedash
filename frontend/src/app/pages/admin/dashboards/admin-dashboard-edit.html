@@ -1,0 +1,115 @@
+@if (error()) {
+  <div class="alert alert-danger">{{ error() }}</div>
+}
+
+<div class="card mb-4">
+  <div class="card-header"><h3 class="card-title">Dashboard-Einstellungen</h3></div>
+  <div class="card-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label">Name</label>
+        <div class="input-group">
+          <input class="form-control" [(ngModel)]="editedName" (keydown.enter)="saveName()" />
+          <button type="button" class="btn btn-outline-secondary" (click)="saveName()" [disabled]="savingSettings()">
+            Speichern
+          </button>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Kachelgröße</label>
+        <select
+          class="form-select"
+          [ngModel]="dashboard()?.tile_size ?? 'medium'"
+          (ngModelChange)="setTileSize($event)"
+        >
+          <option value="small">Klein</option>
+          <option value="medium">Mittel</option>
+          <option value="large">Groß</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+        <div class="card-header"><h3 class="card-title">Dienst hinzufügen</h3></div>
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">Typ</label>
+              <select class="form-select" [(ngModel)]="attachKind">
+                <option value="proxy_host">NPM-Host</option>
+                <option value="guest">Proxmox-Gast</option>
+                <option value="custom_service">Eigener Dienst</option>
+              </select>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Dienst</label>
+              <select class="form-select" [(ngModel)]="attachId">
+                <option [ngValue]="null">— auswählen —</option>
+                @for (svc of availableServices(); track svc.kind + svc.id) {
+                  @if (svc.kind === attachKind) {
+                    <option [ngValue]="svc.id">{{ svc.label }}</option>
+                  }
+                }
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button
+                type="button"
+                class="btn btn-primary w-100"
+                (click)="attach()"
+                [disabled]="attachId == null"
+              >
+                Hinzufügen
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Reihenfolge &amp; Sichtbarkeit</h3>
+          <span class="text-secondary small">
+            Logo, Name und URL werden unter Einstellungen → Dienste konfiguriert.
+          </span>
+          @if (saving()) {
+            <span class="text-secondary small ms-auto">Speichern …</span>
+          }
+        </div>
+        <div class="list-group list-group-flush" cdkDropList (cdkDropListDropped)="drop($event)">
+          @for (item of items(); track item.item_id) {
+            <div class="list-group-item d-flex align-items-center gap-3" cdkDrag>
+              <i class="ti ti-grip-vertical text-secondary" cdkDragHandle style="cursor: grab"></i>
+              @if (item.logo_id) {
+                <img [src]="logoImageUrl(item.logo_id)" alt="" width="20" height="20" />
+              }
+              <span class="text-secondary" style="min-width: 200px">{{ item.label }}</span>
+              <select
+                class="form-select form-select-sm"
+                style="max-width: 160px"
+                [ngModel]="item.category_id ?? ''"
+                (ngModelChange)="setCategory(item, $event)"
+              >
+                <option value="">keine Kategorie</option>
+                @for (category of categories(); track category.id) {
+                  <option [value]="category.id">{{ category.name }}</option>
+                }
+              </select>
+              <div class="form-check form-switch ms-auto mb-0">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  [checked]="item.visible"
+                  (change)="toggleVisible(item)"
+                />
+                <label class="form-check-label">sichtbar</label>
+              </div>
+            </div>
+          } @empty {
+            <div class="list-group-item text-secondary">Noch keine Dienste auf diesem Dashboard.</div>
+          }
+        </div>
+      </div>

@@ -1,0 +1,113 @@
+@if (error()) {
+  <div class="alert alert-danger">{{ error() }}</div>
+}
+
+<div class="card mb-4">
+        <div class="card-header"><h3 class="card-title">Neuen Benutzer anlegen</h3></div>
+        <div class="card-body">
+          <form class="row g-2 align-items-end" (ngSubmit)="createUser()">
+            <div class="col-md-3">
+              <label class="form-label">E-Mail</label>
+              <input class="form-control" type="email" name="email" [(ngModel)]="newEmail" required />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Passwort</label>
+              <input
+                class="form-control"
+                type="password"
+                name="password"
+                [(ngModel)]="newPassword"
+                placeholder="nur lokal"
+              />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Name</label>
+              <input class="form-control" name="displayName" [(ngModel)]="newDisplayName" />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Rolle</label>
+              <select class="form-select" name="role" [(ngModel)]="newRole">
+                <option value="user">Nutzer</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Dashboard</label>
+              <select class="form-select" name="dashboardId" [(ngModel)]="newDashboardId">
+                <option [ngValue]="null">Standard</option>
+                @for (d of dashboards(); track d.id) {
+                  <option [ngValue]="d.id">{{ d.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-md-1">
+              <button class="btn btn-primary w-100" type="submit" [disabled]="creating()">
+                Anlegen
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table card-table table-vcenter">
+            <thead>
+              <tr>
+                <th>E-Mail</th>
+                <th>Name</th>
+                <th>Rolle</th>
+                <th>Dashboard</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users(); track user.id) {
+                <tr>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.display_name || '—' }}</td>
+                  <td>
+                    <select
+                      class="form-select form-select-sm"
+                      [ngModel]="user.role"
+                      (ngModelChange)="setRole(user, $event)"
+                    >
+                      <option value="user">Nutzer</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </td>
+                  <td>
+                    <select
+                      class="form-select form-select-sm"
+                      [ngModel]="user.dashboard_id ?? ''"
+                      (ngModelChange)="setDashboard(user, $event)"
+                    >
+                      <option value="">Standard</option>
+                      @for (d of dashboards(); track d.id) {
+                        <option [value]="d.id">{{ d.name }}</option>
+                      }
+                    </select>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-outline-success]="user.is_active"
+                      [class.btn-outline-secondary]="!user.is_active"
+                      (click)="toggleActive(user)"
+                    >
+                      {{ user.is_active ? 'aktiv' : 'gesperrt' }}
+                    </button>
+                  </td>
+                  <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteUser(user)">
+                      <i class="ti ti-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>

@@ -1,0 +1,20 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Service/guest logos: shown on a white avatar backing (many icons assume a light background or
+   have transparent parts that read poorly on this app's dark theme) and fit via `contain` with a
+   little padding so a wide/tall logo never gets cropped or stretched to fill a square avatar. */
+.logo-img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}
+
+/* A tile with a URL (custom or NPM-derived) is a whole <a class="card">, not just a styled div -
+   without this, a tile whose target the admin has genuinely visited before renders in the
+   browser's default :visited blue while every other tile stays the normal theme color, breaking
+   the "every tile looks the same" consistency regardless of whether it happens to be a link. */
+a.card,
+a.card:visited {
+  color: inherit;
+}
+

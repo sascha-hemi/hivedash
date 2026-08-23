@@ -1,0 +1,16 @@
+services:
+  hivedash:
+    build: .
+    # Or, once you've pushed/pulled an image somewhere:
+    # image: ghcr.io/yourname/hivedash:latest
+    container_name: hivedash
+    restart: unless-stopped
+    ports:
+      - "8081:8000"
+    env_file:
+      - .env
+    volumes:
+      - dashboard-data:/srv/data
+
+volumes:
+  dashboard-data:
