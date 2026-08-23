@@ -9,7 +9,10 @@ so it 404s until the PR below is actually merged.
 
 ```bash
 # Inside a fresh Debian 12/13 LXC or VM (create it yourself via the Proxmox UI first),
-# run as root:
+# run as root. A minimal Debian LXC template ships with neither curl nor wget, and this
+# one-liner needs curl just to fetch itself, so install that first:
+apt update && apt install -y curl
+
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sascha-hemi/hivedash/main/contrib/proxmoxve/standalone-install.sh)"
 ```
 
