@@ -1,0 +1,48 @@
+{
+  "name": "HiveDash",
+  "slug": "hivedash",
+  "categories": [10],
+  "date_created": "2026-08-24",
+  "type": "ct",
+  "updateable": true,
+  "privileged": false,
+  "architectures": ["amd64"],
+  "interface_port": 8000,
+  "documentation": "https://github.com/sascha-hemi/hivedash/blob/main/README.md",
+  "website": "https://github.com/sascha-hemi/hivedash",
+  "repository": "https://github.com/sascha-hemi/hivedash",
+  "logo": "https://raw.githubusercontent.com/sascha-hemi/hivedash/main/frontend/public/favicon.svg",
+  "description": "HiveDash automatically discovers services from Nginx Proxy Manager and Proxmox VE, matching a Proxmox guest to its NPM proxy host by IP or hostname and merging them into one live-updating tile instead of listing both separately. Supports admin-curated dashboards with categories, drag-and-drop ordering, adjustable tile size, a logo library with automatic icon matching against the dashboard-icons catalog, and manually-added services that have no NPM/Proxmox counterpart at all.",
+  "install_methods": [
+    {
+      "type": "default",
+      "script": "ct/hivedash.sh",
+      "config_path": "/opt/hivedash_data/hivedash.env",
+      "resources": {
+        "cpu": 2,
+        "ram": 2048,
+        "hdd": 8,
+        "os": "Debian",
+        "version": "13"
+      }
+    }
+  ],
+  "default_credentials": {
+    "username": "admin@hivedash.local",
+    "password": null
+  },
+  "notes": [
+    {
+      "text": "Nothing is discovered until you edit /opt/hivedash_data/hivedash.env with your Nginx Proxy Manager and Proxmox VE credentials, then run: systemctl restart hivedash",
+      "type": "warning"
+    },
+    {
+      "text": "The generated bootstrap admin password is shown once at the end of the install and saved in /opt/hivedash_data/hivedash.env - save it somewhere safe.",
+      "type": "info"
+    },
+    {
+      "text": "The SQLite database and generated config live in /opt/hivedash_data, outside the app directory, so they survive updates.",
+      "type": "info"
+    }
+  ]
+}
