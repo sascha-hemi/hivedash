@@ -13,6 +13,12 @@ setting_up_container
 network_check
 update_os
 
+msg_info "Installing build dependencies"
+# argon2-cffi (password hashing) may need to compile its C extension from source if the
+# venv's Python is too new for a prebuilt wheel yet.
+$STD apt install -y build-essential libffi-dev python3-dev
+msg_ok "Installed build dependencies"
+
 NODE_VERSION="22" setup_nodejs
 setup_uv
 
