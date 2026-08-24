@@ -39,3 +39,6 @@ the current conventions of [community-scripts/ProxmoxVE](https://github.com/comm
   password, and creates the systemd service.
 - `json/hivedash.json` - metadata for the community-scripts website (description,
   category, default resources, notes shown to the admin after install).
+
+Submission to community-scripts/ProxmoxVE is planned but not yet public - not everything
+about that process is documented in this repo.

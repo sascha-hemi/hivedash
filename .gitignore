@@ -22,3 +22,6 @@ app/static/*
 
 # OS / editor cruft
 .DS_Store
+
+# Local-only notes never meant to be pushed (see the file itself for why)
+*.local.md

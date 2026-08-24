@@ -133,12 +133,12 @@ Pick whichever fits your setup - all three run the exact same application.
 
 ### Option 2: Proxmox VE Community Script
 
-HiveDash is being submitted as an app script to
+HiveDash is planned as an app script for
 [community-scripts/ProxmoxVE](https://github.com/community-scripts/ProxmoxVE) - see
-[`contrib/proxmoxve/`](contrib/proxmoxve/) for the install scripts and submission status.
-Once merged, installing it will be a single command from their site, exactly like any other
-community script - a fresh Debian LXC, Node.js/Python installed automatically, systemd
-service set up, ready to go.
+[`contrib/proxmoxve/`](contrib/proxmoxve/) for the install scripts. Once available there,
+installing it will be a single command from their site, exactly like any other community
+script - a fresh Debian LXC, Node.js/Python installed automatically, systemd service set
+up, ready to go.
 
 ### Option 3: Standalone Proxmox LXC/VM install (works right now)
 
