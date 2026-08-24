@@ -1,8 +1,9 @@
 services:
   hivedash:
-    build: .
-    # Or, once you've pushed/pulled an image somewhere:
-    # image: ghcr.io/yourname/hivedash:latest
+    image: ghcr.io/sascha-hemi/hivedash:latest
+    # Building locally instead (e.g. to test an uncommitted change) - comment out the
+    # image: line above and uncomment this one:
+    # build: .
     container_name: hivedash
     restart: unless-stopped
     ports:

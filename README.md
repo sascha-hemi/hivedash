@@ -115,8 +115,12 @@ Pick whichever fits your setup - all three run the exact same application.
 3. **Start:**
 
    ```bash
-   docker compose up -d --build
+   docker compose up -d
    ```
+
+   This pulls the prebuilt image from `ghcr.io/sascha-hemi/hivedash` - no local build step,
+   no Node/Python toolchain needed on the host. (Prefer to build from source instead? Edit
+   `docker-compose.yml` as noted inline, then run `docker compose up -d --build`.)
 
    The dashboard is then reachable at `http://<server>:8081`.
 
