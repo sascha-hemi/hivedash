@@ -11,6 +11,9 @@
             }
           </div>
         </div>
+        <div class="col-auto">
+          <app-search-bar></app-search-bar>
+        </div>
         @if (auth.isAdmin()) {
           <div class="col-auto">
             <button
@@ -34,12 +37,6 @@
 
   <div class="page-body">
     <div class="container-xl">
-      @if (loadError()) {
-        <div class="alert alert-danger">{{ loadError() }}</div>
-      }
-      @if (editError()) {
-        <div class="alert alert-warning">{{ editError() }}</div>
-      }
       @if (editMode() && savingEdit()) {
         <div class="text-secondary small mb-2">
           <span class="spinner-border spinner-border-sm me-1"></span>{{ 'dashboard.saving' | translate }}
@@ -130,10 +127,6 @@
             <i class="ti ti-plus"></i>
           </button>
         </div>
-      }
-
-      @if (errorBanner) {
-        <div class="text-danger small mt-4">{{ errorBanner }}</div>
       }
     </div>
   </div>

@@ -34,6 +34,8 @@ export const es: Translations = {
     deleteFailed: 'Error al eliminar.',
     createFailed: 'Error al crear.',
     moveFailed: 'Error al mover.',
+    searchPlaceholder: 'Buscar en la web …',
+    searchEngineLabel: 'Buscador',
   },
   tile: {
     cpu: 'CPU',
@@ -168,6 +170,11 @@ export const es: Translations = {
     label: 'Idioma',
     auto: 'Automático',
   },
+  toast: {
+    error: 'Error',
+    warning: 'Aviso',
+    success: 'Éxito',
+  },
   account: {
     title: 'Cuenta',
     languageTitle: 'Idioma',
@@ -181,5 +188,13 @@ export const es: Translations = {
     passwordChanged: 'Contraseña cambiada.',
     changeFailed: 'Error al cambiar la contraseña.',
     ssoManaged: 'Tu contraseña la gestiona tu proveedor de SSO.',
+    aboutTitle: 'Acerca de',
+    version: 'Versión',
+    updateAvailable: 'Actualización disponible: {{version}}',
+    changelogLink: 'Ver registro de cambios',
+  },
+  changelog: {
+    title: 'Registro de cambios',
+    back: 'Volver',
   },
 };

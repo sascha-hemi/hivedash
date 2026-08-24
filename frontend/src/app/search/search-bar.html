@@ -1,0 +1,26 @@
+@if (engineService.engineKeys().length > 0) {
+  <form class="input-group" style="max-width: 480px" (ngSubmit)="submit()">
+    <select
+      class="form-select"
+      style="max-width: 150px"
+      [ngModel]="engineService.effectiveEngine()"
+      name="searchEngine"
+      [attr.aria-label]="'dashboard.searchEngineLabel' | translate"
+      (ngModelChange)="onEngineChange($event)"
+    >
+      @for (key of engineService.engineKeys(); track key) {
+        <option [value]="key">{{ engineService.engines()[key].label }}</option>
+      }
+    </select>
+    <input
+      class="form-control"
+      type="search"
+      name="query"
+      [(ngModel)]="query"
+      [placeholder]="'dashboard.searchPlaceholder' | translate"
+    />
+    <button class="btn btn-outline-secondary" type="submit">
+      <i class="ti ti-search"></i>
+    </button>
+  </form>
+}

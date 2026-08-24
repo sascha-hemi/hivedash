@@ -34,6 +34,8 @@ export const nl: Translations = {
     deleteFailed: 'Verwijderen mislukt.',
     createFailed: 'Aanmaken mislukt.',
     moveFailed: 'Verplaatsen mislukt.',
+    searchPlaceholder: 'Zoek op het web …',
+    searchEngineLabel: 'Zoekmachine',
   },
   tile: {
     cpu: 'CPU',
@@ -168,6 +170,11 @@ export const nl: Translations = {
     label: 'Taal',
     auto: 'Automatisch',
   },
+  toast: {
+    error: 'Fout',
+    warning: 'Waarschuwing',
+    success: 'Gelukt',
+  },
   account: {
     title: 'Account',
     languageTitle: 'Taal',
@@ -181,5 +188,13 @@ export const nl: Translations = {
     passwordChanged: 'Wachtwoord gewijzigd.',
     changeFailed: 'Wachtwoord wijzigen mislukt.',
     ssoManaged: 'Je wachtwoord wordt beheerd door je SSO-provider.',
+    aboutTitle: 'Over',
+    version: 'Versie',
+    updateAvailable: 'Update beschikbaar: {{version}}',
+    changelogLink: 'Wijzigingslog bekijken',
+  },
+  changelog: {
+    title: 'Wijzigingslog',
+    back: 'Terug',
   },
 };

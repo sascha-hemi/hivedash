@@ -34,6 +34,8 @@ export const en: Translations = {
     deleteFailed: 'Delete failed.',
     createFailed: 'Create failed.',
     moveFailed: 'Move failed.',
+    searchPlaceholder: 'Search the web …',
+    searchEngineLabel: 'Search engine',
   },
   tile: {
     cpu: 'CPU',
@@ -168,6 +170,11 @@ export const en: Translations = {
     label: 'Language',
     auto: 'Automatic',
   },
+  toast: {
+    error: 'Error',
+    warning: 'Warning',
+    success: 'Success',
+  },
   account: {
     title: 'Account',
     languageTitle: 'Language',
@@ -181,5 +188,13 @@ export const en: Translations = {
     passwordChanged: 'Password changed.',
     changeFailed: 'Changing the password failed.',
     ssoManaged: 'Your password is managed by your SSO provider.',
+    aboutTitle: 'About',
+    version: 'Version',
+    updateAvailable: 'Update available: {{version}}',
+    changelogLink: 'View changelog',
+  },
+  changelog: {
+    title: 'Changelog',
+    back: 'Back',
   },
 };

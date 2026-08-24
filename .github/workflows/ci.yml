@@ -88,5 +88,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # Baked into the image as HIVEDASH_VERSION (see Dockerfile) - "X.Y.Z" for a version
+          # tag push, "main" for a push to main - surfaced by GET /api/version for the
+          # frontend's version display + update-check.
+          build-args: HIVEDASH_VERSION=${{ steps.meta.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

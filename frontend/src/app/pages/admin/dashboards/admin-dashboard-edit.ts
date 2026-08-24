@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../../core/admin.service';
 import { AdminDashboard, AdminDashboardItem, AvailableService, Category, TileSize } from '../../../core/models';
+import { ToastService } from '../../../core/toast.service';
 
 @Component({
   selector: 'app-admin-dashboard-edit',
@@ -16,13 +17,13 @@ export class AdminDashboardEditPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly admin = inject(AdminService);
   private readonly translate = inject(TranslateService);
+  private readonly toast = inject(ToastService);
 
   dashboardId = 0;
   readonly dashboard = signal<AdminDashboard | null>(null);
   readonly items = signal<AdminDashboardItem[]>([]);
   readonly availableServices = signal<AvailableService[]>([]);
   readonly categories = signal<Category[]>([]);
-  readonly error = signal<string | null>(null);
   readonly saving = signal(false);
   readonly savingSettings = signal(false);
 
@@ -59,7 +60,7 @@ export class AdminDashboardEditPage implements OnInit {
       await this.admin.renameDashboard(this.dashboardId, name);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.dashboardEdit.renameFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.dashboardEdit.renameFailed')));
     } finally {
       this.savingSettings.set(false);
     }
@@ -71,7 +72,7 @@ export class AdminDashboardEditPage implements OnInit {
       const dashboard = await this.admin.setTileSize(this.dashboardId, tileSize as TileSize);
       this.dashboard.set(dashboard);
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.dashboardEdit.tileSizeFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.dashboardEdit.tileSizeFailed')));
     } finally {
       this.savingSettings.set(false);
     }
@@ -90,7 +91,7 @@ export class AdminDashboardEditPage implements OnInit {
         ]),
       );
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.dashboardEdit.categoryAssignFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.dashboardEdit.categoryAssignFailed')));
     }
   }
 
@@ -132,7 +133,7 @@ export class AdminDashboardEditPage implements OnInit {
       this.attachId = null;
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.dashboardEdit.addFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.dashboardEdit.addFailed')));
     }
   }
 }

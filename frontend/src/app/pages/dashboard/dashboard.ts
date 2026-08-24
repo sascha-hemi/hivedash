@@ -16,6 +16,8 @@ import { AuthService } from '../../core/auth.service';
 import { DashboardService } from '../../core/dashboard.service';
 import { DashboardWsService } from '../../core/dashboard-ws.service';
 import { DashboardResponse, DashboardSection, Tile, TileSize } from '../../core/models';
+import { ToastService } from '../../core/toast.service';
+import { SearchBar } from '../../search/search-bar';
 import { CustomCard } from './custom-card';
 import { InfraCard } from './infra-card';
 import { ServiceCard } from './service-card';
@@ -38,6 +40,7 @@ const TILE_COLUMN_CLASSES: Record<TileSize, string> = {
     CdkDrag,
     CdkDragHandle,
     TranslatePipe,
+    SearchBar,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -46,17 +49,23 @@ export class DashboardPage implements OnInit, OnDestroy {
   private readonly dashboardService = inject(DashboardService);
   private readonly adminService = inject(AdminService);
   private readonly translate = inject(TranslateService);
+  private readonly toast = inject(ToastService);
   protected readonly ws = inject(DashboardWsService);
   protected readonly auth = inject(AuthService);
 
   private fallbackTimer: ReturnType<typeof setTimeout> | undefined;
   private destroyed = false;
+  // Edge-triggered: a toast fires once when a source's error message first appears or changes,
+  // never again for the same still-ongoing failure (every poll would otherwise spam a new toast
+  // for as long as e.g. Proxmox stays unreachable). Tracked separately from `hasLoadError` below,
+  // which is about the frontend's own request to the backend rather than a data source.
+  private lastNpmError: string | null = null;
+  private lastProxmoxError: string | null = null;
+  private hasLoadError = false;
 
   readonly data = signal<DashboardResponse | null>(null);
-  readonly loadError = signal<string | null>(null);
   readonly editMode = signal(false);
   readonly savingEdit = signal(false);
-  readonly editError = signal<string | null>(null);
 
   newCategoryName = '';
 
@@ -68,9 +77,30 @@ export class DashboardPage implements OnInit, OnDestroy {
       const pushed = this.ws.data();
       if (pushed && !this.editMode()) {
         this.data.set(pushed);
-        this.loadError.set(null);
+        this.hasLoadError = false;
       }
     });
+
+    effect(() => {
+      const d = this.data();
+      if (!d) return;
+      this.toastOnSourceErrorChange('NPM', d.errors.npm, () => this.lastNpmError, (v) => (this.lastNpmError = v));
+      this.toastOnSourceErrorChange(
+        'Proxmox', d.errors.proxmox, () => this.lastProxmoxError, (v) => (this.lastProxmoxError = v),
+      );
+    });
+  }
+
+  private toastOnSourceErrorChange(
+    label: string,
+    message: string | null,
+    getLast: () => string | null,
+    setLast: (value: string | null) => void,
+  ): void {
+    if (message && message !== getLast()) {
+      this.toast.show(`${label}: ${message}`);
+    }
+    setLast(message);
   }
 
   ngOnInit(): void {
@@ -90,10 +120,16 @@ export class DashboardPage implements OnInit, OnDestroy {
       const data = await this.dashboardService.fetch();
       if (this.destroyed) return;
       this.data.set(data);
-      this.loadError.set(null);
+      this.hasLoadError = false;
     } catch {
       if (this.destroyed) return;
-      this.loadError.set(this.translate.instant('dashboard.apiUnreachable'));
+      // Edge-triggered like the NPM/Proxmox toasts above - the fallback timer retries this
+      // every poll interval while the websocket is down, and a still-unreachable backend
+      // shouldn't spam a new toast on every single retry.
+      if (!this.hasLoadError) {
+        this.toast.show(this.translate.instant('dashboard.apiUnreachable'));
+      }
+      this.hasLoadError = true;
     }
   }
 
@@ -109,15 +145,6 @@ export class DashboardPage implements OnInit, OnDestroy {
       }
       this.scheduleFallbackCheck();
     }, interval);
-  }
-
-  get errorBanner(): string {
-    const d = this.data();
-    if (!d) return '';
-    const parts: string[] = [];
-    if (d.errors.npm) parts.push(`npm: ${d.errors.npm}`);
-    if (d.errors.proxmox) parts.push(`proxmox: ${d.errors.proxmox}`);
-    return parts.join(' · ');
   }
 
   get generatedAtLabel(): string {
@@ -193,11 +220,10 @@ export class DashboardPage implements OnInit, OnDestroy {
     }
 
     this.savingEdit.set(true);
-    this.editError.set(null);
     try {
       await this.adminService.updateDashboardItems(current.dashboard.id, updates);
     } catch {
-      this.editError.set(this.translate.instant('dashboard.saveFailedReload'));
+      this.toast.show(this.translate.instant('dashboard.saveFailedReload'), 'warning');
     } finally {
       this.savingEdit.set(false);
     }
@@ -212,7 +238,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       await this.adminService.createCategory(dashboardId, name);
       await this.refresh();
     } catch {
-      this.editError.set(this.translate.instant('dashboard.createFailed'));
+      this.toast.show(this.translate.instant('dashboard.createFailed'), 'warning');
     }
   }
 
@@ -223,7 +249,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       await this.adminService.updateCategory(dashboardId, section.id, { name: name.trim() });
       section.name = name.trim();
     } catch {
-      this.editError.set(this.translate.instant('dashboard.renameFailed'));
+      this.toast.show(this.translate.instant('dashboard.renameFailed'), 'warning');
     }
   }
 
@@ -235,7 +261,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       await this.adminService.deleteCategory(dashboardId, section.id);
       await this.refresh();
     } catch {
-      this.editError.set(this.translate.instant('dashboard.deleteFailed'));
+      this.toast.show(this.translate.instant('dashboard.deleteFailed'), 'warning');
     }
   }
 
@@ -254,7 +280,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       await this.adminService.updateCategory(dashboardId, neighbor.id, { sort_order: current.sort_order });
       await this.refresh();
     } catch {
-      this.editError.set(this.translate.instant('dashboard.moveFailed'));
+      this.toast.show(this.translate.instant('dashboard.moveFailed'), 'warning');
     }
   }
 }

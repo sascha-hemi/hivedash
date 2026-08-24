@@ -4,6 +4,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../../core/admin.service';
 import { CustomService, DiscoveredService, Logo } from '../../../core/models';
+import { ToastService } from '../../../core/toast.service';
 
 @Component({
   selector: 'app-admin-services',
@@ -13,11 +14,11 @@ import { CustomService, DiscoveredService, Logo } from '../../../core/models';
 export class AdminServicesPage implements OnInit {
   private readonly admin = inject(AdminService);
   private readonly translate = inject(TranslateService);
+  private readonly toast = inject(ToastService);
 
   readonly discovered = signal<DiscoveredService[]>([]);
   readonly customServices = signal<CustomService[]>([]);
   readonly logos = signal<Logo[]>([]);
-  readonly error = signal<string | null>(null);
   readonly creating = signal(false);
 
   newName = '';
@@ -53,7 +54,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateService(service.kind, service.id, { custom_name: name || null });
       service.custom_name = name || null;
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.services.renameFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.services.renameFailed')));
     }
   }
 
@@ -62,7 +63,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateService(service.kind, service.id, { custom_url: url || null });
       service.custom_url = url || null;
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.services.urlSaveFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.services.urlSaveFailed')));
     }
   }
 
@@ -72,7 +73,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateService(service.kind, service.id, { logo_id: id });
       service.logo_id = id;
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.services.logoAssignFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.services.logoAssignFailed')));
     }
   }
 
@@ -80,7 +81,6 @@ export class AdminServicesPage implements OnInit {
     const name = this.newName.trim();
     if (!name) return;
     this.creating.set(true);
-    this.error.set(null);
     try {
       await this.admin.createCustomService({
         name,
@@ -92,7 +92,7 @@ export class AdminServicesPage implements OnInit {
       this.newLogoId = null;
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.services.createFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.services.createFailed')));
     } finally {
       this.creating.set(false);
     }
@@ -104,7 +104,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateCustomService(service.id, { name: name.trim() });
       service.name = name.trim();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.services.renameFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.services.renameFailed')));
     }
   }
 
@@ -113,7 +113,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateCustomService(service.id, { url: url || null });
       service.url = url || null;
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.services.urlSaveFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.services.urlSaveFailed')));
     }
   }
 
@@ -123,7 +123,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateCustomService(service.id, { logo_id: id });
       service.logo_id = id;
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.services.logoAssignFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.services.logoAssignFailed')));
     }
   }
 
@@ -133,7 +133,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.deleteCustomService(service.id);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.services.deleteFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.services.deleteFailed')));
     }
   }
 

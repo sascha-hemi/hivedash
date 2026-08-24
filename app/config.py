@@ -50,6 +50,16 @@ class Settings:
     # service with no local logo match yet. Set to false for fully offline polling.
     logo_catalog_auto_import: bool = _bool("LOGO_CATALOG_AUTO_IMPORT", True)
 
+    # Instance-wide default for the dashboard search bar (see app/search_engines.py) - any user
+    # without their own override (User.search_engine) gets this. Validated lazily via
+    # resolve_search_engine() wherever it's read, not here, so an unknown/typo'd value never
+    # crashes startup - it just falls back to the hardcoded default.
+    default_search_engine: str = os.environ.get("SEARCH_ENGINE", "google")
+
+    # Baked in at Docker build time (see Dockerfile's HIVEDASH_VERSION build-arg) - "dev" for a
+    # local run with no build-arg given (e.g. `uvicorn app.main:app --reload`).
+    version: str = os.environ.get("HIVEDASH_VERSION", "dev")
+
     @property
     def npm_enabled(self) -> bool:
         return bool(self.npm_url and self.npm_email and self.npm_password)

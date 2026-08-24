@@ -36,6 +36,8 @@ export const de: Translations = {
     deleteFailed: 'Löschen fehlgeschlagen.',
     createFailed: 'Kategorie anlegen fehlgeschlagen.',
     moveFailed: 'Verschieben fehlgeschlagen.',
+    searchPlaceholder: 'Web durchsuchen …',
+    searchEngineLabel: 'Suchmaschine',
   },
   tile: {
     cpu: 'CPU',
@@ -170,6 +172,11 @@ export const de: Translations = {
     label: 'Sprache',
     auto: 'Automatisch',
   },
+  toast: {
+    error: 'Fehler',
+    warning: 'Hinweis',
+    success: 'Erfolg',
+  },
   account: {
     title: 'Konto',
     languageTitle: 'Sprache',
@@ -183,5 +190,13 @@ export const de: Translations = {
     passwordChanged: 'Passwort geändert.',
     changeFailed: 'Passwort ändern fehlgeschlagen.',
     ssoManaged: 'Dein Passwort wird von deinem SSO-Anbieter verwaltet.',
+    aboutTitle: 'Über',
+    version: 'Version',
+    updateAvailable: 'Update verfügbar: {{version}}',
+    changelogLink: 'Änderungsprotokoll ansehen',
+  },
+  changelog: {
+    title: 'Änderungsprotokoll',
+    back: 'Zurück',
   },
 };

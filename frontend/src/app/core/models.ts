@@ -6,6 +6,31 @@ export interface CurrentUser {
   locale: string | null;
   // false for an OIDC-provisioned account - it has no local password to change at all.
   has_password: boolean;
+  // null means "use the instance's SEARCH_ENGINE default" (see search/search-engine.service.ts).
+  search_engine: string | null;
+}
+
+export interface SearchEngine {
+  label: string;
+  url_template: string;
+}
+
+export interface VersionInfo {
+  current: string;
+  // The three below are null until the backend's first update-check cycle completes, and stay
+  // null forever if that check has never once succeeded (network failure, rate limit, ...).
+  latest: string | null;
+  latest_url: string | null;
+  // null (not true/false) means "can't tell" (e.g. a "dev" build has no comparable version) -
+  // must be treated as "don't show an update banner", not as "up to date".
+  update_available: boolean | null;
+  checked_at: string | null;
+}
+
+export interface AuthConfig {
+  oidc_enabled: boolean;
+  search_engines: Record<string, SearchEngine>;
+  default_search_engine: string;
 }
 
 export interface VmStats {

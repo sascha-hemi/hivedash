@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../core/auth.service';
+import { ToastService } from '../../core/toast.service';
 import { LanguageSwitcher } from '../../i18n/language-switcher';
 
 @Component({
@@ -16,11 +17,11 @@ export class LoginPage implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly toast = inject(ToastService);
 
   email = '';
   password = '';
   readonly submitting = signal(false);
-  readonly error = signal<string | null>(null);
   readonly oidcEnabled = signal(false);
 
   async ngOnInit(): Promise<void> {
@@ -28,13 +29,12 @@ export class LoginPage implements OnInit {
   }
 
   async submit(): Promise<void> {
-    this.error.set(null);
     this.submitting.set(true);
     try {
       await this.auth.login(this.email, this.password);
       await this.router.navigateByUrl('/');
     } catch {
-      this.error.set(this.translate.instant('login.invalidCredentials'));
+      this.toast.show(this.translate.instant('login.invalidCredentials'));
     } finally {
       this.submitting.set(false);
     }

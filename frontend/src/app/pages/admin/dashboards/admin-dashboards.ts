@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../../core/admin.service';
 import { AdminDashboard } from '../../../core/models';
+import { ToastService } from '../../../core/toast.service';
 
 @Component({
   selector: 'app-admin-dashboards',
@@ -14,9 +15,9 @@ import { AdminDashboard } from '../../../core/models';
 export class AdminDashboardsPage implements OnInit {
   private readonly admin = inject(AdminService);
   private readonly translate = inject(TranslateService);
+  private readonly toast = inject(ToastService);
 
   readonly dashboards = signal<AdminDashboard[]>([]);
-  readonly error = signal<string | null>(null);
   readonly creating = signal(false);
   newName = '';
 
@@ -36,7 +37,7 @@ export class AdminDashboardsPage implements OnInit {
       this.newName = '';
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.dashboards.createFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.dashboards.createFailed')));
     } finally {
       this.creating.set(false);
     }
@@ -53,7 +54,7 @@ export class AdminDashboardsPage implements OnInit {
       await this.admin.deleteDashboard(dashboard.id);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.dashboards.deleteFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.dashboards.deleteFailed')));
     }
   }
 

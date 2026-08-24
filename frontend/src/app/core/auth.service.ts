@@ -73,4 +73,12 @@ export class AuthService {
       }),
     );
   }
+
+  /** Called by SearchEngineService after PATCH /api/auth/me - same idiom as setUserLocale. */
+  setUserSearchEngine(searchEngine: string | null): void {
+    const current = this._user();
+    if (current) {
+      this._user.set({ ...current, search_engine: searchEngine });
+    }
+  }
 }

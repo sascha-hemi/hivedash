@@ -47,6 +47,10 @@ class User(Base):
     # a self-service field: a user sets their own via PATCH /api/auth/me, independent of
     # everything else on this row that only an admin can touch via /api/admin/users.
     locale: Mapped[str | None] = mapped_column(default=None)
+    # Explicit search-bar engine choice ("google", "bing", ...) - NULL means "use the instance's
+    # SEARCH_ENGINE default" (see app/search_engines.py). Same self-service idiom as locale
+    # above: a user sets their own via PATCH /api/auth/me.
+    search_engine: Mapped[str | None] = mapped_column(default=None)
     created_at: Mapped[datetime] = mapped_column(default=_utcnow)
 
     dashboard: Mapped["Dashboard | None"] = relationship(back_populates="users")

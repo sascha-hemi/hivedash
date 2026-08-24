@@ -63,6 +63,7 @@ async def main():
         assert resp.json() == {
             "id": resp.json()["id"], "email": "admin@test.local",
             "display_name": "Admin", "role": "admin", "locale": None, "has_password": True,
+            "search_engine": None,
         }
 
         # self-service locale: no CSRF -> 403, same rule as every other mutating route
@@ -79,6 +80,22 @@ async def main():
         # null resets to auto-detect - must actually be applied (exclude_unset, not "is None")
         resp = await client.patch("/api/auth/me", json={"locale": None}, headers={"X-CSRF-Token": csrf})
         assert resp.status_code == 200 and resp.json()["locale"] is None, resp.text
+
+        # self-service search engine: same shape as locale
+        resp = await client.patch("/api/auth/me", json={"search_engine": "bing"}, headers={"X-CSRF-Token": csrf})
+        assert resp.status_code == 200 and resp.json()["search_engine"] == "bing", resp.text
+
+        resp = await client.patch("/api/auth/me", json={"search_engine": "altavista"}, headers={"X-CSRF-Token": csrf})
+        assert resp.status_code == 422, resp.text
+
+        resp = await client.patch("/api/auth/me", json={"search_engine": None}, headers={"X-CSRF-Token": csrf})
+        assert resp.status_code == 200 and resp.json()["search_engine"] is None, resp.text
+
+        # public config: engine catalog + instance default (SEARCH_ENGINE env, defaults to google)
+        resp = await client.get("/api/auth/config")
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["default_search_engine"] == "google"
+        assert "bing" in resp.json()["search_engines"] and "google" in resp.json()["search_engines"]
 
         # self-service password change: wrong current password -> 401, nothing changed
         resp = await client.patch(

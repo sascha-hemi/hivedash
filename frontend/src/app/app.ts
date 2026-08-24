@@ -3,11 +3,12 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { AuthService } from './core/auth.service';
+import { ToastContainer } from './core/toast-container';
 import { LocaleService } from './i18n/locale.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, ToastContainer],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

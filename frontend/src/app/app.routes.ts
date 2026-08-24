@@ -19,6 +19,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/account/account').then((m) => m.AccountPage),
   },
   {
+    path: 'changelog',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/changelog/changelog').then((m) => m.ChangelogPage),
+  },
+  {
     path: 'admin',
     canActivate: [adminGuard],
     loadComponent: () => import('./pages/admin/admin-shell').then((m) => m.AdminShell),

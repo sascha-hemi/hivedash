@@ -4,6 +4,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../../core/admin.service';
 import { CatalogIconResult, Logo } from '../../../core/models';
+import { ToastService } from '../../../core/toast.service';
 
 @Component({
   selector: 'app-admin-logos',
@@ -13,9 +14,9 @@ import { CatalogIconResult, Logo } from '../../../core/models';
 export class AdminLogosPage implements OnInit {
   private readonly admin = inject(AdminService);
   private readonly translate = inject(TranslateService);
+  private readonly toast = inject(ToastService);
 
   readonly logos = signal<Logo[]>([]);
-  readonly error = signal<string | null>(null);
 
   // manual upload
   uploadName = '';
@@ -49,7 +50,6 @@ export class AdminLogosPage implements OnInit {
   async upload(): Promise<void> {
     if (!this.uploadFile || !this.uploadName.trim()) return;
     this.uploading.set(true);
-    this.error.set(null);
     try {
       await this.admin.uploadLogo(this.uploadName.trim(), this.uploadKeywords, this.uploadFile);
       this.uploadName = '';
@@ -57,7 +57,7 @@ export class AdminLogosPage implements OnInit {
       this.uploadFile = null;
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.logos.uploadFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.logos.uploadFailed')));
     } finally {
       this.uploading.set(false);
     }
@@ -69,7 +69,7 @@ export class AdminLogosPage implements OnInit {
       await this.admin.deleteLogo(logo.id);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.logos.deleteFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.logos.deleteFailed')));
     }
   }
 
@@ -79,11 +79,10 @@ export class AdminLogosPage implements OnInit {
       return;
     }
     this.searching.set(true);
-    this.error.set(null);
     try {
       this.catalogResults.set(await this.admin.searchLogoCatalog(this.catalogQuery.trim()));
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.logos.searchFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.logos.searchFailed')));
     } finally {
       this.searching.set(false);
     }
@@ -91,12 +90,11 @@ export class AdminLogosPage implements OnInit {
 
   async importFromCatalog(result: CatalogIconResult): Promise<void> {
     this.importingSlug.set(result.slug);
-    this.error.set(null);
     try {
       await this.admin.importLogoFromCatalog(result.slug);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.logos.importFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.logos.importFailed')));
     } finally {
       this.importingSlug.set(null);
     }

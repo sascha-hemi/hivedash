@@ -22,6 +22,7 @@ from app.db.engine import get_db_session
 from app.db.timeutil import utcnow
 from app.db.models import Session as SessionModel
 from app.db.models import User
+from app.search_engines import SEARCH_ENGINES, resolve_search_engine
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -41,6 +42,7 @@ def _user_out(user: User) -> dict:
         # False for an OIDC-provisioned account (no local password at all) - the frontend uses
         # this to hide the password-change form entirely rather than show it and fail.
         "has_password": user.password_hash is not None,
+        "search_engine": user.search_engine,
     }
 
 
@@ -123,6 +125,8 @@ class UpdateMeRequest(BaseModel):
     # can never set one this way - that identity is managed entirely by the SSO provider.
     current_password: str | None = None
     new_password: str | None = None
+    # None resets to the instance's SEARCH_ENGINE default, exactly like locale above.
+    search_engine: str | None = None
 
 
 @router.patch("/me", dependencies=[Depends(require_csrf)])
@@ -131,8 +135,9 @@ async def update_me(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> dict:
-    """Self-service - a user may only ever change their own locale/password here, nothing else
-    about their own account (role/email/dashboard stay admin-only via /api/admin/users)."""
+    """Self-service - a user may only ever change their own locale/password/search_engine here,
+    nothing else about their own account (role/email/dashboard stay admin-only via
+    /api/admin/users)."""
     fields = payload.model_dump(exclude_unset=True)
     if "locale" in fields:
         locale = fields["locale"]
@@ -153,12 +158,23 @@ async def update_me(
         user.password_hash = hash_password(new_password)
         await session.commit()
 
+    if "search_engine" in fields:
+        engine = fields["search_engine"]
+        if engine is not None and engine not in SEARCH_ENGINES:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"unsupported search engine: {engine}")
+        user.search_engine = engine
+        await session.commit()
+
     return _user_out(user)
 
 
 @router.get("/config")
 async def auth_config() -> dict:
-    return {"oidc_enabled": settings.oidc_enabled}
+    return {
+        "oidc_enabled": settings.oidc_enabled,
+        "search_engines": SEARCH_ENGINES,
+        "default_search_engine": resolve_search_engine(settings.default_search_engine),
+    }
 
 
 @router.get("/oidc/login")

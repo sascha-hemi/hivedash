@@ -53,6 +53,7 @@ python tests/test_admin_dashboards.py  # dashboard tile_size/category CRUD + cat
 python tests/test_admin_services.py    # "Dienste" page: global logo/name/url on a proxy_host/guest + custom-service CRUD
 python tests/test_admin_logos.py       # logo upload/list/delete + dangling-reference cleanup + image serving auth
 python tests/test_clients_live.py      # NpmClient/ProxmoxClient against a local fake HTTP server
+python tests/test_version_check.py     # pure version parsing/comparison logic, no network
 ```
 
 `tests/fake_backend.py` is not a test — a standalone fake NPM+Proxmox server for manual smoke

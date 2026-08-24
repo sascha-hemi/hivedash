@@ -4,6 +4,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, Response
@@ -25,6 +26,12 @@ from app.db.models import User
 from app.merge import build_dashboard
 from app.routers.admin import router as admin_router
 from app.spa_static import SPAStaticFiles
+from app.version_check import fetch_latest_release, is_update_available
+
+# Repo root in dev (this file is app/main.py); the same relative layout is preserved in the
+# Docker image, where the Dockerfile COPYs CHANGELOG.md next to the app/ directory under /srv.
+CHANGELOG_PATH = Path(__file__).resolve().parent.parent / "CHANGELOG.md"
+VERSION_CHECK_INTERVAL_SECONDS = 6 * 3600
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("dashboard")
@@ -46,6 +53,15 @@ state: dict = {
     "npm_error": "not polled yet" if npm_client else "NPM not configured",
     "proxmox_error": "not polled yet" if proxmox_client else "Proxmox not configured",
     "generated_at": None,
+}
+
+# Update-check result cache (see app/version_check.py) - refreshed on its own slow timer, never
+# on-demand per request, so a page load never waits on (or triggers) a GitHub API call.
+version_state: dict = {
+    "latest": None,
+    "latest_url": None,
+    "update_available": None,
+    "checked_at": None,
 }
 
 
@@ -113,7 +129,10 @@ async def poll_npm_once() -> None:
     try:
         hosts = await npm_client.list_proxy_hosts()
     except Exception as exc:  # noqa: BLE001
-        state["npm_error"] = str(exc)
+        # str(exc) can be "" for some httpx errors (e.g. ConnectTimeout) - falling back to the
+        # exception's class name guarantees a non-empty message, since the frontend's error
+        # banner only renders a truthy string and would otherwise silently show nothing at all.
+        state["npm_error"] = str(exc) or type(exc).__name__
         logger.warning("NPM poll failed: %s", exc)
         return
 
@@ -134,7 +153,9 @@ async def poll_proxmox_once() -> None:
     try:
         guests = await proxmox_client.list_guests()
     except Exception as exc:  # noqa: BLE001
-        state["proxmox_error"] = str(exc)
+        # See the matching comment in poll_npm_once() - never let an empty str(exc) result in
+        # a silently-missing error banner on the dashboard.
+        state["proxmox_error"] = str(exc) or type(exc).__name__
         logger.warning("Proxmox poll failed: %s", exc)
         return
 
@@ -166,6 +187,25 @@ async def proxmox_poll_loop() -> None:
         await asyncio.sleep(settings.proxmox_poll_interval_seconds)
 
 
+async def version_check_once() -> None:
+    release = await fetch_latest_release()
+    if release is None:
+        return  # best-effort - leave the previous result (if any) in place rather than clear it
+    version_state["latest"] = release["tag_name"]
+    version_state["latest_url"] = release["html_url"]
+    version_state["update_available"] = is_update_available(settings.version, release["tag_name"])
+    version_state["checked_at"] = datetime.now(timezone.utc).isoformat()
+
+
+async def version_check_loop() -> None:
+    while True:
+        try:
+            await version_check_once()
+        except Exception:  # noqa: BLE001
+            logger.exception("Unexpected error in version-check loop")
+        await asyncio.sleep(VERSION_CHECK_INTERVAL_SECONDS)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await init_models()
@@ -175,9 +215,11 @@ async def lifespan(_: FastAPI):
 
     npm_task = asyncio.create_task(npm_poll_loop())
     proxmox_task = asyncio.create_task(proxmox_poll_loop())
+    version_task = asyncio.create_task(version_check_loop())
     yield
     npm_task.cancel()
     proxmox_task.cancel()
+    version_task.cancel()
 
 
 app = FastAPI(title="HiveDash", lifespan=lifespan)
@@ -228,6 +270,22 @@ async def dashboard_ws(websocket: WebSocket) -> None:
 @app.get("/api/health")
 async def health() -> dict:
     return {"status": "ok"}
+
+
+@app.get("/api/version")
+async def get_version() -> dict:
+    """Unauthenticated like /api/health - version number isn't sensitive, and this is read by
+    the account page for every logged-in user, not just admins."""
+    return {"current": settings.version, **version_state}
+
+
+@app.get("/api/changelog")
+async def get_changelog() -> dict:
+    try:
+        markdown = CHANGELOG_PATH.read_text()
+    except OSError:
+        markdown = ""
+    return {"markdown": markdown}
 
 
 @app.get("/api/logos/{logo_id}/image")

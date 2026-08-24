@@ -13,12 +13,20 @@ FROM python:3.12-slim
 
 WORKDIR /srv
 
+# Baked in at build time (see .github/workflows/ci.yml, which passes the git tag/branch via
+# docker/metadata-action's `version` output) - "dev" for a plain local `docker build .` with no
+# build-arg given. Read by app/config.py, surfaced via GET /api/version for the frontend's
+# version display + update-check (see app/version_check.py).
+ARG HIVEDASH_VERSION=dev
+ENV HIVEDASH_VERSION=${HIVEDASH_VERSION}
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 COPY alembic.ini ./
 COPY migrations ./migrations
+COPY CHANGELOG.md ./
 COPY --from=frontend-build /src/dist/frontend/browser ./app/static
 
 EXPOSE 8000

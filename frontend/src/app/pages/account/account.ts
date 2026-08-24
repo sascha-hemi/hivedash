@@ -1,8 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../core/auth.service';
+import { VersionInfo } from '../../core/models';
+import { ToastService } from '../../core/toast.service';
+import { VersionService } from '../../core/version.service';
 import { LanguageSwitcher } from '../../i18n/language-switcher';
 
 /** Accessible to every logged-in user (authGuard, not adminGuard) - language choice and password
@@ -10,30 +14,32 @@ import { LanguageSwitcher } from '../../i18n/language-switcher';
  * "Einstellungen" area, which only admins can reach. */
 @Component({
   selector: 'app-account',
-  imports: [FormsModule, TranslatePipe, LanguageSwitcher],
+  imports: [FormsModule, TranslatePipe, LanguageSwitcher, RouterLink],
   templateUrl: './account.html',
 })
-export class AccountPage {
+export class AccountPage implements OnInit {
   protected readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
+  private readonly toast = inject(ToastService);
+  private readonly versionService = inject(VersionService);
 
   currentPassword = '';
   newPassword = '';
   confirmPassword = '';
   readonly saving = signal(false);
-  readonly error = signal<string | null>(null);
-  readonly success = signal(false);
+  readonly version = signal<VersionInfo | null>(null);
+
+  async ngOnInit(): Promise<void> {
+    this.version.set(await this.versionService.fetch().catch(() => null));
+  }
 
   async changePassword(): Promise<void> {
-    this.error.set(null);
-    this.success.set(false);
-
     if (!this.newPassword) {
-      this.error.set(this.translate.instant('account.passwordEmpty'));
+      this.toast.show(this.translate.instant('account.passwordEmpty'));
       return;
     }
     if (this.newPassword !== this.confirmPassword) {
-      this.error.set(this.translate.instant('account.passwordMismatch'));
+      this.toast.show(this.translate.instant('account.passwordMismatch'));
       return;
     }
 
@@ -43,9 +49,9 @@ export class AccountPage {
       this.currentPassword = '';
       this.newPassword = '';
       this.confirmPassword = '';
-      this.success.set(true);
+      this.toast.show(this.translate.instant('account.passwordChanged'), 'success');
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('account.changeFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('account.changeFailed')));
     } finally {
       this.saving.set(false);
     }

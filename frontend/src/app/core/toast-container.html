@@ -1,0 +1,23 @@
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <span
+          class="avatar avatar-xs rounded-circle me-2"
+          [class.bg-red]="toast.variant === 'danger'"
+          [class.bg-yellow]="toast.variant === 'warning'"
+          [class.bg-green]="toast.variant === 'success'"
+        ></span>
+        <strong class="me-auto">
+          @switch (toast.variant) {
+            @case ('success') { {{ 'toast.success' | translate }} }
+            @case ('warning') { {{ 'toast.warning' | translate }} }
+            @default { {{ 'toast.error' | translate }} }
+          }
+        </strong>
+        <button type="button" class="btn-close" (click)="dismiss(toast.id)" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">{{ toast.message }}</div>
+    </div>
+  }
+</div>

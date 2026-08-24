@@ -35,6 +35,8 @@ export interface Translations {
     deleteFailed: string;
     createFailed: string;
     moveFailed: string;
+    searchPlaceholder: string;
+    searchEngineLabel: string;
   };
   tile: {
     cpu: string;
@@ -169,6 +171,11 @@ export interface Translations {
     label: string;
     auto: string;
   };
+  toast: {
+    error: string;
+    warning: string;
+    success: string;
+  };
   account: {
     title: string;
     languageTitle: string;
@@ -182,5 +189,13 @@ export interface Translations {
     passwordChanged: string;
     changeFailed: string;
     ssoManaged: string;
+    aboutTitle: string;
+    version: string;
+    updateAvailable: string;
+    changelogLink: string;
+  };
+  changelog: {
+    title: string;
+    back: string;
   };
 }

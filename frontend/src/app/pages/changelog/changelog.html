@@ -1,0 +1,30 @@
+<div class="page-wrapper">
+  <div class="page-header d-print-none">
+    <div class="container-xl">
+      <div class="row align-items-center">
+        <div class="col">
+          <h2 class="page-title">{{ 'changelog.title' | translate }}</h2>
+        </div>
+        <div class="col-auto">
+          <a class="btn btn-outline-secondary" routerLink="/account">
+            <i class="ti ti-arrow-left me-1"></i>{{ 'changelog.back' | translate }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div class="container-xl" style="max-width: 720px">
+      <div class="card">
+        <div class="card-body markdown">
+          @if (loading()) {
+            <span class="spinner-border spinner-border-sm"></span>
+          } @else {
+            <div [innerHTML]="html()"></div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

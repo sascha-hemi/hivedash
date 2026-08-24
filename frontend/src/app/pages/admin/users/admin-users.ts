@@ -4,6 +4,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../../core/admin.service';
 import { AdminDashboard, AdminUser } from '../../../core/models';
+import { ToastService } from '../../../core/toast.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -13,10 +14,10 @@ import { AdminDashboard, AdminUser } from '../../../core/models';
 export class AdminUsersPage implements OnInit {
   private readonly admin = inject(AdminService);
   private readonly translate = inject(TranslateService);
+  private readonly toast = inject(ToastService);
 
   readonly users = signal<AdminUser[]>([]);
   readonly dashboards = signal<AdminDashboard[]>([]);
-  readonly error = signal<string | null>(null);
   readonly creating = signal(false);
 
   newEmail = '';
@@ -39,7 +40,6 @@ export class AdminUsersPage implements OnInit {
   }
 
   async createUser(): Promise<void> {
-    this.error.set(null);
     this.creating.set(true);
     try {
       await this.admin.createUser({
@@ -56,7 +56,7 @@ export class AdminUsersPage implements OnInit {
       this.newDashboardId = null;
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.users.createFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.users.createFailed')));
     } finally {
       this.creating.set(false);
     }
@@ -67,7 +67,7 @@ export class AdminUsersPage implements OnInit {
       await this.admin.updateUser(user.id, { is_active: !user.is_active });
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.users.actionFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.users.actionFailed')));
     }
   }
 
@@ -76,7 +76,7 @@ export class AdminUsersPage implements OnInit {
       await this.admin.updateUser(user.id, { role });
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.users.actionFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.users.actionFailed')));
     }
   }
 
@@ -87,7 +87,7 @@ export class AdminUsersPage implements OnInit {
       });
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.users.actionFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.users.actionFailed')));
     }
   }
 
@@ -97,7 +97,7 @@ export class AdminUsersPage implements OnInit {
       await this.admin.deleteUser(user.id);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, this.translate.instant('admin.users.deleteFailed')));
+      this.toast.show(this.extractError(err, this.translate.instant('admin.users.deleteFailed')));
     }
   }
 
