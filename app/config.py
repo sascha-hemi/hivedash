@@ -29,7 +29,6 @@ class Settings:
     npm_poll_interval_seconds: int = int(os.environ.get("NPM_POLL_INTERVAL_SECONDS", "60"))
     proxmox_poll_interval_seconds: int = int(os.environ.get("PROXMOX_POLL_INTERVAL_SECONDS", "5"))
     request_timeout_seconds: float = float(os.environ.get("REQUEST_TIMEOUT_SECONDS", "10"))
-    dashboard_title: str = os.environ.get("DASHBOARD_TITLE", "HiveDash")
 
     # Database
     database_path: str = os.environ.get("DATABASE_PATH", "data/dashboard.db")

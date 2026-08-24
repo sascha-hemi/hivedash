@@ -1,16 +1,18 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../../core/admin.service';
 import { AdminDashboard, AdminUser } from '../../../core/models';
 
 @Component({
   selector: 'app-admin-users',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './admin-users.html',
 })
 export class AdminUsersPage implements OnInit {
   private readonly admin = inject(AdminService);
+  private readonly translate = inject(TranslateService);
 
   readonly users = signal<AdminUser[]>([]);
   readonly dashboards = signal<AdminDashboard[]>([]);
@@ -54,7 +56,7 @@ export class AdminUsersPage implements OnInit {
       this.newDashboardId = null;
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Anlegen fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.users.createFailed')));
     } finally {
       this.creating.set(false);
     }
@@ -65,7 +67,7 @@ export class AdminUsersPage implements OnInit {
       await this.admin.updateUser(user.id, { is_active: !user.is_active });
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Aktion fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.users.actionFailed')));
     }
   }
 
@@ -74,7 +76,7 @@ export class AdminUsersPage implements OnInit {
       await this.admin.updateUser(user.id, { role });
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Aktion fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.users.actionFailed')));
     }
   }
 
@@ -85,17 +87,17 @@ export class AdminUsersPage implements OnInit {
       });
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Aktion fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.users.actionFailed')));
     }
   }
 
   async deleteUser(user: AdminUser): Promise<void> {
-    if (!confirm(`${user.email} wirklich löschen?`)) return;
+    if (!confirm(this.translate.instant('admin.users.confirmDelete', { email: user.email }))) return;
     try {
       await this.admin.deleteUser(user.id);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Löschen fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.users.deleteFailed')));
     }
   }
 

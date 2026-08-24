@@ -1,12 +1,13 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
-import { avatarColorClass, formatBytes, initials, kindLabel, statusDotClass, statusDotTitle } from '../../core/format';
+import { avatarColorClass, formatBytes, initials, kindLabel, statusDotClass, statusDotTitleKey } from '../../core/format';
 import { ServiceTile } from '../../core/models';
 
 @Component({
   selector: 'app-service-card',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, TranslatePipe],
   templateUrl: './service-card.html',
 })
 export class ServiceCard {
@@ -16,8 +17,8 @@ export class ServiceCard {
     return statusDotClass(this.tile.online);
   }
 
-  get dotTitle(): string {
-    return statusDotTitle(this.tile.online);
+  get dotTitleKey(): string {
+    return statusDotTitleKey(this.tile.online);
   }
 
   get subLine(): string {

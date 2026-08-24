@@ -5,18 +5,18 @@
 <div class="row row-cards mb-4">
   <div class="col-md-6">
     <div class="card h-100">
-      <div class="card-header"><h3 class="card-title">Aus Katalog importieren</h3></div>
+      <div class="card-header"><h3 class="card-title">{{ 'admin.logos.importFromCatalog' | translate }}</h3></div>
       <div class="card-body">
         <p class="text-secondary small">
-          Durchsucht <a href="https://github.com/homarr-labs/dashboard-icons" target="_blank" rel="noopener">dashboard-icons</a>
-          (Apache-2.0) nach passenden Icons für bekannte Self-Hosted-Apps.
+          {{ 'admin.logos.searchHint' | translate }}
+          <a href="https://github.com/homarr-labs/dashboard-icons" target="_blank" rel="noopener">dashboard-icons</a>
         </p>
         <form class="input-group mb-3" (ngSubmit)="searchCatalog()">
           <input
             class="form-control"
             name="catalogQuery"
             [(ngModel)]="catalogQuery"
-            placeholder="z. B. plex, sonarr, proxmox"
+            [placeholder]="'admin.logos.searchPlaceholder' | translate"
           />
           <button class="btn btn-outline-secondary" type="submit" [disabled]="searching()">
             <i class="ti ti-search"></i>
@@ -40,14 +40,14 @@
                   @if (importingSlug() === result.slug) {
                     <span class="spinner-border spinner-border-sm"></span>
                   } @else {
-                    Import
+                    {{ 'admin.logos.import' | translate }}
                   }
                 </button>
               </div>
             </div>
           } @empty {
             @if (catalogQuery && !searching()) {
-              <div class="col text-secondary small">Keine Treffer.</div>
+              <div class="col text-secondary small">{{ 'admin.logos.noResults' | translate }}</div>
             }
           }
         </div>
@@ -57,15 +57,15 @@
 
   <div class="col-md-6">
     <div class="card h-100">
-      <div class="card-header"><h3 class="card-title">Eigenes Logo hochladen</h3></div>
+      <div class="card-header"><h3 class="card-title">{{ 'admin.logos.uploadOwn' | translate }}</h3></div>
       <div class="card-body">
         <form (ngSubmit)="upload()">
           <div class="mb-2">
-            <label class="form-label">Name</label>
+            <label class="form-label">{{ 'admin.logos.name' | translate }}</label>
             <input class="form-control" name="uploadName" [(ngModel)]="uploadName" required />
           </div>
           <div class="mb-2">
-            <label class="form-label">Stichwörter (kommagetrennt)</label>
+            <label class="form-label">{{ 'admin.logos.keywords' | translate }}</label>
             <input
               class="form-control"
               name="uploadKeywords"
@@ -73,15 +73,15 @@
               placeholder="z. B. plex, plexmediaserver"
             />
             <div class="form-hint">
-              Wird für die automatische Zuordnung zu Domains/Namen verwendet.
+              {{ 'admin.logos.keywordsHint' | translate }}
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Bilddatei</label>
+            <label class="form-label">{{ 'admin.logos.imageFile' | translate }}</label>
             <input class="form-control" type="file" accept="image/*" (change)="onFileSelected($event)" required />
           </div>
           <button class="btn btn-primary" type="submit" [disabled]="uploading() || !uploadFile">
-            Hochladen
+            {{ 'admin.logos.upload' | translate }}
           </button>
         </form>
       </div>
@@ -90,14 +90,14 @@
 </div>
 
 <div class="card">
-  <div class="card-header"><h3 class="card-title">Logo-Bibliothek ({{ logos().length }})</h3></div>
+  <div class="card-header"><h3 class="card-title">{{ 'admin.logos.library' | translate: { count: logos().length } }}</h3></div>
   <div class="table-responsive">
     <table class="table card-table table-vcenter">
       <thead>
         <tr>
           <th></th>
-          <th>Name</th>
-          <th>Stichwörter</th>
+          <th>{{ 'admin.logos.name' | translate }}</th>
+          <th>{{ 'admin.logos.colKeywords' | translate }}</th>
           <th></th>
         </tr>
       </thead>
@@ -118,7 +118,7 @@
             </td>
           </tr>
         } @empty {
-          <tr><td colspan="4" class="text-secondary">Noch keine Logos hinterlegt.</td></tr>
+          <tr><td colspan="4" class="text-secondary">{{ 'admin.logos.noneYet' | translate }}</td></tr>
         }
       </tbody>
     </table>

@@ -1,16 +1,18 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../../core/admin.service';
 import { CustomService, DiscoveredService, Logo } from '../../../core/models';
 
 @Component({
   selector: 'app-admin-services',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './admin-services.html',
 })
 export class AdminServicesPage implements OnInit {
   private readonly admin = inject(AdminService);
+  private readonly translate = inject(TranslateService);
 
   readonly discovered = signal<DiscoveredService[]>([]);
   readonly customServices = signal<CustomService[]>([]);
@@ -42,8 +44,8 @@ export class AdminServicesPage implements OnInit {
   }
 
   badgeLabel(service: DiscoveredService): string {
-    if (service.kind === 'proxy_host' && service.secondary_label) return 'NPM + Proxmox';
-    return service.kind === 'proxy_host' ? 'NPM' : 'Proxmox';
+    if (service.kind === 'proxy_host' && service.secondary_label) return this.translate.instant('admin.services.combinedBadge');
+    return this.translate.instant(service.kind === 'proxy_host' ? 'admin.services.npmBadge' : 'admin.services.proxmoxBadge');
   }
 
   async setDiscoveredName(service: DiscoveredService, name: string): Promise<void> {
@@ -51,7 +53,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateService(service.kind, service.id, { custom_name: name || null });
       service.custom_name = name || null;
     } catch (err) {
-      this.error.set(this.extractError(err, 'Umbenennen fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.services.renameFailed')));
     }
   }
 
@@ -60,7 +62,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateService(service.kind, service.id, { custom_url: url || null });
       service.custom_url = url || null;
     } catch (err) {
-      this.error.set(this.extractError(err, 'URL speichern fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.services.urlSaveFailed')));
     }
   }
 
@@ -70,7 +72,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateService(service.kind, service.id, { logo_id: id });
       service.logo_id = id;
     } catch (err) {
-      this.error.set(this.extractError(err, 'Logo-Zuordnung fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.services.logoAssignFailed')));
     }
   }
 
@@ -90,7 +92,7 @@ export class AdminServicesPage implements OnInit {
       this.newLogoId = null;
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Anlegen fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.services.createFailed')));
     } finally {
       this.creating.set(false);
     }
@@ -102,7 +104,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateCustomService(service.id, { name: name.trim() });
       service.name = name.trim();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Umbenennen fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.services.renameFailed')));
     }
   }
 
@@ -111,7 +113,7 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateCustomService(service.id, { url: url || null });
       service.url = url || null;
     } catch (err) {
-      this.error.set(this.extractError(err, 'URL speichern fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.services.urlSaveFailed')));
     }
   }
 
@@ -121,17 +123,17 @@ export class AdminServicesPage implements OnInit {
       await this.admin.updateCustomService(service.id, { logo_id: id });
       service.logo_id = id;
     } catch (err) {
-      this.error.set(this.extractError(err, 'Logo-Zuordnung fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.services.logoAssignFailed')));
     }
   }
 
   async deleteCustomService(service: CustomService): Promise<void> {
-    if (!confirm(`Eigenen Dienst "${service.name}" wirklich löschen?`)) return;
+    if (!confirm(this.translate.instant('admin.services.confirmDeleteCustom', { name: service.name }))) return;
     try {
       await this.admin.deleteCustomService(service.id);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Löschen fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.services.deleteFailed')));
     }
   }
 

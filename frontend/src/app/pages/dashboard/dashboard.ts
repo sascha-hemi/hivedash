@@ -9,6 +9,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { Component, OnDestroy, OnInit, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../core/admin.service';
 import { AuthService } from '../../core/auth.service';
@@ -36,6 +37,7 @@ const TILE_COLUMN_CLASSES: Record<TileSize, string> = {
     CdkDropListGroup,
     CdkDrag,
     CdkDragHandle,
+    TranslatePipe,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -43,6 +45,7 @@ const TILE_COLUMN_CLASSES: Record<TileSize, string> = {
 export class DashboardPage implements OnInit, OnDestroy {
   private readonly dashboardService = inject(DashboardService);
   private readonly adminService = inject(AdminService);
+  private readonly translate = inject(TranslateService);
   protected readonly ws = inject(DashboardWsService);
   protected readonly auth = inject(AuthService);
 
@@ -90,7 +93,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       this.loadError.set(null);
     } catch {
       if (this.destroyed) return;
-      this.loadError.set('Dashboard-API nicht erreichbar.');
+      this.loadError.set(this.translate.instant('dashboard.apiUnreachable'));
     }
   }
 
@@ -119,8 +122,9 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   get generatedAtLabel(): string {
     const d = this.data();
-    if (!d?.generated_at) return 'Noch keine Daten';
-    return 'Aktualisiert: ' + new Date(d.generated_at).toLocaleTimeString('de-DE');
+    if (!d?.generated_at) return this.translate.instant('dashboard.noDataYet');
+    const time = new Date(d.generated_at).toLocaleTimeString(this.translate.currentLang() ?? undefined);
+    return `${this.translate.instant('dashboard.updated')}: ${time}`;
   }
 
   tileColumnClass(): string {
@@ -130,6 +134,15 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   hasCategories(): boolean {
     return this.data()?.sections.some((s) => s.id !== null) ?? false;
+  }
+
+  /** The two built-in sections arrive from the backend as the fixed strings "Dienste"/
+   * "Infrastruktur" (see app.dashboard_view - never localized server-side); a custom category's
+   * name is arbitrary admin-authored text and is shown exactly as entered, untranslated. */
+  sectionLabel(section: DashboardSection): string {
+    if (section.id !== null) return section.name;
+    const key = section.name === 'Infrastruktur' ? 'dashboard.infrastructure' : 'dashboard.services';
+    return this.translate.instant(key);
   }
 
   async toggleEditMode(): Promise<void> {
@@ -184,7 +197,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     try {
       await this.adminService.updateDashboardItems(current.dashboard.id, updates);
     } catch {
-      this.editError.set('Speichern fehlgeschlagen - bitte neu laden und erneut versuchen.');
+      this.editError.set(this.translate.instant('dashboard.saveFailedReload'));
     } finally {
       this.savingEdit.set(false);
     }
@@ -199,7 +212,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       await this.adminService.createCategory(dashboardId, name);
       await this.refresh();
     } catch {
-      this.editError.set('Kategorie anlegen fehlgeschlagen.');
+      this.editError.set(this.translate.instant('dashboard.createFailed'));
     }
   }
 
@@ -210,19 +223,19 @@ export class DashboardPage implements OnInit, OnDestroy {
       await this.adminService.updateCategory(dashboardId, section.id, { name: name.trim() });
       section.name = name.trim();
     } catch {
-      this.editError.set('Umbenennen fehlgeschlagen.');
+      this.editError.set(this.translate.instant('dashboard.renameFailed'));
     }
   }
 
   async deleteCategory(section: DashboardSection): Promise<void> {
     const dashboardId = this.data()?.dashboard.id;
     if (section.id === null || !dashboardId) return;
-    if (!confirm(`Kategorie "${section.name}" wirklich löschen? Die Kacheln bleiben erhalten.`)) return;
+    if (!confirm(this.translate.instant('dashboard.deleteCategoryConfirm', { name: section.name }))) return;
     try {
       await this.adminService.deleteCategory(dashboardId, section.id);
       await this.refresh();
     } catch {
-      this.editError.set('Löschen fehlgeschlagen.');
+      this.editError.set(this.translate.instant('dashboard.deleteFailed'));
     }
   }
 
@@ -241,7 +254,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       await this.adminService.updateCategory(dashboardId, neighbor.id, { sort_order: current.sort_order });
       await this.refresh();
     } catch {
-      this.editError.set('Verschieben fehlgeschlagen.');
+      this.editError.set(this.translate.instant('dashboard.moveFailed'));
     }
   }
 }

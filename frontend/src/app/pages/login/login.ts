@@ -1,18 +1,21 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../core/auth.service';
+import { LanguageSwitcher } from '../../i18n/language-switcher';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe, LanguageSwitcher],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class LoginPage implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   email = '';
   password = '';
@@ -31,7 +34,7 @@ export class LoginPage implements OnInit {
       await this.auth.login(this.email, this.password);
       await this.router.navigateByUrl('/');
     } catch {
-      this.error.set('E-Mail oder Passwort ist falsch.');
+      this.error.set(this.translate.instant('login.invalidCredentials'));
     } finally {
       this.submitting.set(false);
     }

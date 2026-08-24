@@ -1,18 +1,21 @@
 <div class="page page-center">
   <div class="container container-tight py-4">
+    <div class="d-flex justify-content-center mb-2">
+      <app-language-switcher></app-language-switcher>
+    </div>
     <div class="text-center mb-4">
       <span class="navbar-brand navbar-brand-autodark">HiveDash</span>
     </div>
     <form class="card card-md" (ngSubmit)="submit()" novalidate>
       <div class="card-body">
-        <h2 class="h2 text-center mb-4">Anmelden</h2>
+        <h2 class="h2 text-center mb-4">{{ 'login.title' | translate }}</h2>
 
         @if (error()) {
           <div class="alert alert-danger" role="alert">{{ error() }}</div>
         }
 
         <div class="mb-3">
-          <label class="form-label">E-Mail</label>
+          <label class="form-label">{{ 'login.email' | translate }}</label>
           <input
             type="email"
             class="form-control"
@@ -23,7 +26,7 @@
           />
         </div>
         <div class="mb-2">
-          <label class="form-label">Passwort</label>
+          <label class="form-label">{{ 'login.password' | translate }}</label>
           <input
             type="password"
             class="form-control"
@@ -38,15 +41,15 @@
             @if (submitting()) {
               <span class="spinner-border spinner-border-sm me-2"></span>
             }
-            Anmelden
+            {{ 'login.title' | translate }}
           </button>
         </div>
 
         @if (oidcEnabled()) {
-          <div class="hr-text">oder</div>
+          <div class="hr-text">{{ 'login.or' | translate }}</div>
           <button type="button" class="btn btn-outline-secondary w-100" (click)="loginWithOidc()">
             <i class="ti ti-shield-lock me-2"></i>
-            Mit SSO anmelden
+            {{ 'login.ssoButton' | translate }}
           </button>
         }
       </div>

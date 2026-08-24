@@ -20,16 +20,16 @@
     <div class="flex-fill" style="min-width: 0">
       <div class="d-flex align-items-center justify-content-between">
         <div class="fw-bold text-truncate">{{ tile.name }}</div>
-        <span class="status-dot ms-2" [class]="dotClass" [title]="dotTitle"></span>
+        <span class="status-dot ms-2" [class]="dotClass" [title]="dotTitleKey | translate"></span>
       </div>
       <div class="text-secondary small text-truncate">{{ subLine }}</div>
       @if (cpuPercent != null || memLabel != null) {
         <div class="d-flex gap-3 small text-secondary mt-1">
           @if (cpuPercent != null) {
-            <span>CPU {{ cpuPercent }}%</span>
+            <span>{{ 'tile.cpu' | translate }} {{ cpuPercent }}%</span>
           }
           @if (memLabel != null) {
-            <span>RAM {{ memLabel }}</span>
+            <span>{{ 'tile.ram' | translate }} {{ memLabel }}</span>
           }
         </div>
       }

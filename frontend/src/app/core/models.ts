@@ -3,6 +3,9 @@ export interface CurrentUser {
   email: string;
   display_name: string | null;
   role: 'admin' | 'user';
+  locale: string | null;
+  // false for an OIDC-provisioned account - it has no local password to change at all.
+  has_password: boolean;
 }
 
 export interface VmStats {
@@ -66,7 +69,6 @@ export interface DashboardSection {
 }
 
 export interface DashboardResponse {
-  title: string;
   generated_at: string | null;
   poll_interval_seconds: number;
   dashboard: { id: number; name: string; tile_size: TileSize };

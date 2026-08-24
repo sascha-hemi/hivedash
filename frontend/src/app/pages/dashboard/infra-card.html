@@ -26,7 +26,7 @@
         <span class="badge" [class.bg-purple-lt]="tile.kind === 'qemu'" [class.bg-yellow-lt]="tile.kind === 'lxc'">
           {{ kindLabel }}
         </span>
-        #{{ tile.vmid }} auf {{ tile.node }}
+        {{ 'tile.vmOnNode' | translate: { vmid: tile.vmid, node: tile.node } }}
         @if (firstIp) {
           · {{ firstIp }}
         }
@@ -34,10 +34,10 @@
       @if (cpuPercent != null || memLabel != null) {
         <div class="d-flex gap-3 small text-secondary mt-1">
           @if (cpuPercent != null) {
-            <span>CPU {{ cpuPercent }}%</span>
+            <span>{{ 'tile.cpu' | translate }} {{ cpuPercent }}%</span>
           }
           @if (memLabel != null) {
-            <span>RAM {{ memLabel }}</span>
+            <span>{{ 'tile.ram' | translate }} {{ memLabel }}</span>
           }
         </div>
       }

@@ -1,16 +1,18 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../../core/admin.service';
 import { CatalogIconResult, Logo } from '../../../core/models';
 
 @Component({
   selector: 'app-admin-logos',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './admin-logos.html',
 })
 export class AdminLogosPage implements OnInit {
   private readonly admin = inject(AdminService);
+  private readonly translate = inject(TranslateService);
 
   readonly logos = signal<Logo[]>([]);
   readonly error = signal<string | null>(null);
@@ -55,19 +57,19 @@ export class AdminLogosPage implements OnInit {
       this.uploadFile = null;
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Upload fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.logos.uploadFailed')));
     } finally {
       this.uploading.set(false);
     }
   }
 
   async deleteLogo(logo: Logo): Promise<void> {
-    if (!confirm(`Logo "${logo.name}" wirklich löschen?`)) return;
+    if (!confirm(this.translate.instant('admin.logos.confirmDelete', { name: logo.name }))) return;
     try {
       await this.admin.deleteLogo(logo.id);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Löschen fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.logos.deleteFailed')));
     }
   }
 
@@ -81,7 +83,7 @@ export class AdminLogosPage implements OnInit {
     try {
       this.catalogResults.set(await this.admin.searchLogoCatalog(this.catalogQuery.trim()));
     } catch (err) {
-      this.error.set(this.extractError(err, 'Katalog-Suche fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.logos.searchFailed')));
     } finally {
       this.searching.set(false);
     }
@@ -94,7 +96,7 @@ export class AdminLogosPage implements OnInit {
       await this.admin.importLogoFromCatalog(result.slug);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Import fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.logos.importFailed')));
     } finally {
       this.importingSlug.set(null);
     }

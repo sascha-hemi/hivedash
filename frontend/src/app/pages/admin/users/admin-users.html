@@ -3,38 +3,38 @@
 }
 
 <div class="card mb-4">
-        <div class="card-header"><h3 class="card-title">Neuen Benutzer anlegen</h3></div>
+        <div class="card-header"><h3 class="card-title">{{ 'admin.users.createNew' | translate }}</h3></div>
         <div class="card-body">
           <form class="row g-2 align-items-end" (ngSubmit)="createUser()">
             <div class="col-md-3">
-              <label class="form-label">E-Mail</label>
+              <label class="form-label">{{ 'admin.users.email' | translate }}</label>
               <input class="form-control" type="email" name="email" [(ngModel)]="newEmail" required />
             </div>
             <div class="col-md-2">
-              <label class="form-label">Passwort</label>
+              <label class="form-label">{{ 'admin.users.password' | translate }}</label>
               <input
                 class="form-control"
                 type="password"
                 name="password"
                 [(ngModel)]="newPassword"
-                placeholder="nur lokal"
+                [placeholder]="'admin.users.localOnly' | translate"
               />
             </div>
             <div class="col-md-2">
-              <label class="form-label">Name</label>
+              <label class="form-label">{{ 'admin.users.name' | translate }}</label>
               <input class="form-control" name="displayName" [(ngModel)]="newDisplayName" />
             </div>
             <div class="col-md-2">
-              <label class="form-label">Rolle</label>
+              <label class="form-label">{{ 'admin.users.role' | translate }}</label>
               <select class="form-select" name="role" [(ngModel)]="newRole">
-                <option value="user">Nutzer</option>
-                <option value="admin">Admin</option>
+                <option value="user">{{ 'admin.users.user' | translate }}</option>
+                <option value="admin">{{ 'admin.users.admin' | translate }}</option>
               </select>
             </div>
             <div class="col-md-2">
-              <label class="form-label">Dashboard</label>
+              <label class="form-label">{{ 'admin.users.dashboard' | translate }}</label>
               <select class="form-select" name="dashboardId" [(ngModel)]="newDashboardId">
-                <option [ngValue]="null">Standard</option>
+                <option [ngValue]="null">{{ 'admin.users.default' | translate }}</option>
                 @for (d of dashboards(); track d.id) {
                   <option [ngValue]="d.id">{{ d.name }}</option>
                 }
@@ -42,7 +42,7 @@
             </div>
             <div class="col-md-1">
               <button class="btn btn-primary w-100" type="submit" [disabled]="creating()">
-                Anlegen
+                {{ 'admin.users.create' | translate }}
               </button>
             </div>
           </form>
@@ -54,11 +54,11 @@
           <table class="table card-table table-vcenter">
             <thead>
               <tr>
-                <th>E-Mail</th>
-                <th>Name</th>
-                <th>Rolle</th>
-                <th>Dashboard</th>
-                <th>Status</th>
+                <th>{{ 'admin.users.colEmail' | translate }}</th>
+                <th>{{ 'admin.users.colName' | translate }}</th>
+                <th>{{ 'admin.users.colRole' | translate }}</th>
+                <th>{{ 'admin.users.colDashboard' | translate }}</th>
+                <th>{{ 'admin.users.colStatus' | translate }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -73,8 +73,8 @@
                       [ngModel]="user.role"
                       (ngModelChange)="setRole(user, $event)"
                     >
-                      <option value="user">Nutzer</option>
-                      <option value="admin">Admin</option>
+                      <option value="user">{{ 'admin.users.user' | translate }}</option>
+                      <option value="admin">{{ 'admin.users.admin' | translate }}</option>
                     </select>
                   </td>
                   <td>
@@ -83,7 +83,7 @@
                       [ngModel]="user.dashboard_id ?? ''"
                       (ngModelChange)="setDashboard(user, $event)"
                     >
-                      <option value="">Standard</option>
+                      <option value="">{{ 'admin.users.default' | translate }}</option>
                       @for (d of dashboards(); track d.id) {
                         <option [value]="d.id">{{ d.name }}</option>
                       }
@@ -97,7 +97,7 @@
                       [class.btn-outline-secondary]="!user.is_active"
                       (click)="toggleActive(user)"
                     >
-                      {{ user.is_active ? 'aktiv' : 'gesperrt' }}
+                      {{ user.is_active ? ('admin.users.active' | translate) : ('admin.users.locked' | translate) }}
                     </button>
                   </td>
                   <td class="text-end">

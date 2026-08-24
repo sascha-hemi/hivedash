@@ -13,6 +13,7 @@ from app.auth.oidc import oauth, provision_user_from_oidc_claims
 from app.auth.security import (
     generate_csrf_token,
     generate_session_token,
+    hash_password,
     hash_session_token,
     verify_password,
 )
@@ -24,6 +25,11 @@ from app.db.models import User
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
+# Kept in sync with frontend/src/app/i18n's language files - the one place both sides agree on
+# which codes are actually supported (a stray value elsewhere in the DB just falls back to
+# auto-detect on the frontend, but we don't want *new* invalid values written via the API).
+SUPPORTED_LOCALES = {"en", "de", "nl", "es", "fr"}
+
 
 def _user_out(user: User) -> dict:
     return {
@@ -31,6 +37,10 @@ def _user_out(user: User) -> dict:
         "email": user.email,
         "display_name": user.display_name,
         "role": user.role,
+        "locale": user.locale,
+        # False for an OIDC-provisioned account (no local password at all) - the frontend uses
+        # this to hide the password-change form entirely rather than show it and fail.
+        "has_password": user.password_hash is not None,
     }
 
 
@@ -101,6 +111,48 @@ async def logout(
 
 @router.get("/me")
 async def me(user: User = Depends(get_current_user)) -> dict:
+    return _user_out(user)
+
+
+class UpdateMeRequest(BaseModel):
+    # None is a valid, meaningful value here (reset to auto-detect) - exclude_unset (not "is None")
+    # is what distinguishes "the field was in the request body at all" from "leave it alone".
+    locale: str | None = None
+    # Changing the password is only ever done together: both must be present, verified against
+    # the current hash before being accepted. An OIDC-provisioned account (password_hash is None)
+    # can never set one this way - that identity is managed entirely by the SSO provider.
+    current_password: str | None = None
+    new_password: str | None = None
+
+
+@router.patch("/me", dependencies=[Depends(require_csrf)])
+async def update_me(
+    payload: UpdateMeRequest,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> dict:
+    """Self-service - a user may only ever change their own locale/password here, nothing else
+    about their own account (role/email/dashboard stay admin-only via /api/admin/users)."""
+    fields = payload.model_dump(exclude_unset=True)
+    if "locale" in fields:
+        locale = fields["locale"]
+        if locale is not None and locale not in SUPPORTED_LOCALES:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"unsupported locale: {locale}")
+        user.locale = locale
+        await session.commit()
+
+    if "new_password" in fields:
+        if user.password_hash is None:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "account has no local password (managed via SSO)")
+        new_password = fields["new_password"]
+        current_password = fields.get("current_password")
+        if not current_password or not verify_password(current_password, user.password_hash):
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "current password is incorrect")
+        if not new_password:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "new password must not be empty")
+        user.password_hash = hash_password(new_password)
+        await session.commit()
+
     return _user_out(user)
 
 

@@ -1,0 +1,72 @@
+<div class="page-wrapper">
+  <div class="page-header d-print-none">
+    <div class="container-xl">
+      <h2 class="page-title">{{ 'account.title' | translate }}</h2>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div class="container-xl" style="max-width: 640px">
+      <div class="card mb-4">
+        <div class="card-header"><h3 class="card-title">{{ 'account.languageTitle' | translate }}</h3></div>
+        <div class="card-body">
+          <app-language-switcher></app-language-switcher>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">{{ 'account.passwordTitle' | translate }}</h3></div>
+        <div class="card-body">
+          @if (auth.user()?.has_password) {
+            @if (error()) {
+              <div class="alert alert-danger">{{ error() }}</div>
+            }
+            @if (success()) {
+              <div class="alert alert-success">{{ 'account.passwordChanged' | translate }}</div>
+            }
+            <form (ngSubmit)="changePassword()">
+              <div class="mb-3">
+                <label class="form-label">{{ 'account.currentPassword' | translate }}</label>
+                <input
+                  class="form-control"
+                  type="password"
+                  name="currentPassword"
+                  autocomplete="current-password"
+                  [(ngModel)]="currentPassword"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">{{ 'account.newPassword' | translate }}</label>
+                <input
+                  class="form-control"
+                  type="password"
+                  name="newPassword"
+                  autocomplete="new-password"
+                  [(ngModel)]="newPassword"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">{{ 'account.confirmPassword' | translate }}</label>
+                <input
+                  class="form-control"
+                  type="password"
+                  name="confirmPassword"
+                  autocomplete="new-password"
+                  [(ngModel)]="confirmPassword"
+                  required
+                />
+              </div>
+              <button class="btn btn-primary" type="submit" [disabled]="saving()">
+                {{ 'account.save' | translate }}
+              </button>
+            </form>
+          } @else {
+            <p class="text-secondary mb-0">{{ 'account.ssoManaged' | translate }}</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

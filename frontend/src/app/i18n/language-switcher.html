@@ -1,0 +1,12 @@
+<select
+  class="form-select form-select-sm"
+  style="width: auto"
+  [ngModel]="currentLang"
+  (ngModelChange)="onChange($event)"
+  aria-label="Language"
+>
+  <option value="auto">🌐 Auto</option>
+  @for (locale of locales; track locale) {
+    <option [value]="locale">{{ labels[locale] }}</option>
+  }
+</select>

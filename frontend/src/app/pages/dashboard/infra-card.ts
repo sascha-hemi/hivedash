@@ -1,12 +1,13 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { avatarColorClass, formatBytes, initials, kindLabel, statusDotClass } from '../../core/format';
 import { InfrastructureTile } from '../../core/models';
 
 @Component({
   selector: 'app-infra-card',
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, TranslatePipe],
   templateUrl: './infra-card.html',
 })
 export class InfraCard {

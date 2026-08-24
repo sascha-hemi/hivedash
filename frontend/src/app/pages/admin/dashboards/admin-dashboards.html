@@ -4,27 +4,26 @@
 
 <div class="card mb-4">
         <div class="card-header">
-          <h3 class="card-title">Neues Dashboard anlegen</h3>
+          <h3 class="card-title">{{ 'admin.dashboards.newDashboard' | translate }}</h3>
         </div>
         <div class="card-body">
           <p class="text-secondary">
-            Startet als Kopie des aktuellen Standard-Dashboards - neue Dienste erscheinen darauf
-            danach nicht mehr automatisch, sondern müssen hier bewusst hinzugefügt werden.
+            {{ 'admin.dashboards.startsAsCopy' | translate }}
           </p>
           <form class="row g-2 align-items-end" (ngSubmit)="create()">
             <div class="col-md-4">
-              <label class="form-label">Name</label>
+              <label class="form-label">{{ 'admin.dashboards.name' | translate }}</label>
               <input
                 class="form-control"
                 name="newName"
                 [(ngModel)]="newName"
-                placeholder="z. B. Gäste-Ansicht"
+                [placeholder]="'admin.dashboards.namePlaceholder' | translate"
                 required
               />
             </div>
             <div class="col-md-2">
               <button class="btn btn-primary w-100" type="submit" [disabled]="creating()">
-                Anlegen
+                {{ 'admin.dashboards.create' | translate }}
               </button>
             </div>
           </form>
@@ -36,8 +35,8 @@
           <table class="table card-table table-vcenter">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Standard</th>
+                <th>{{ 'admin.dashboards.colName' | translate }}</th>
+                <th>{{ 'admin.dashboards.colDefault' | translate }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -47,14 +46,14 @@
                   <td><a [routerLink]="['/admin/dashboards', d.id]">{{ d.name }}</a></td>
                   <td>
                     @if (d.is_default) {
-                      <span class="badge bg-green-lt">Standard</span>
+                      <span class="badge bg-green-lt">{{ 'admin.dashboards.colDefault' | translate }}</span>
                     } @else {
                       <button
                         type="button"
                         class="btn btn-sm btn-outline-secondary"
                         (click)="setDefault(d)"
                       >
-                        Als Standard setzen
+                        {{ 'admin.dashboards.setAsDefault' | translate }}
                       </button>
                     }
                   </td>

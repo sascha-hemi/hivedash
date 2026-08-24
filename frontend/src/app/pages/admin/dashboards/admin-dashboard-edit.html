@@ -3,28 +3,28 @@
 }
 
 <div class="card mb-4">
-  <div class="card-header"><h3 class="card-title">Dashboard-Einstellungen</h3></div>
+  <div class="card-header"><h3 class="card-title">{{ 'admin.dashboardEdit.settings' | translate }}</h3></div>
   <div class="card-body">
     <div class="row g-2 align-items-end">
       <div class="col-md-5">
-        <label class="form-label">Name</label>
+        <label class="form-label">{{ 'admin.services.name' | translate }}</label>
         <div class="input-group">
           <input class="form-control" [(ngModel)]="editedName" (keydown.enter)="saveName()" />
           <button type="button" class="btn btn-outline-secondary" (click)="saveName()" [disabled]="savingSettings()">
-            Speichern
+            {{ 'admin.dashboardEdit.save' | translate }}
           </button>
         </div>
       </div>
       <div class="col-md-3">
-        <label class="form-label">Kachelgröße</label>
+        <label class="form-label">{{ 'admin.dashboardEdit.tileSize' | translate }}</label>
         <select
           class="form-select"
           [ngModel]="dashboard()?.tile_size ?? 'medium'"
           (ngModelChange)="setTileSize($event)"
         >
-          <option value="small">Klein</option>
-          <option value="medium">Mittel</option>
-          <option value="large">Groß</option>
+          <option value="small">{{ 'admin.dashboardEdit.small' | translate }}</option>
+          <option value="medium">{{ 'admin.dashboardEdit.medium' | translate }}</option>
+          <option value="large">{{ 'admin.dashboardEdit.large' | translate }}</option>
         </select>
       </div>
     </div>
@@ -32,21 +32,21 @@
 </div>
 
 <div class="card mb-4">
-        <div class="card-header"><h3 class="card-title">Dienst hinzufügen</h3></div>
+        <div class="card-header"><h3 class="card-title">{{ 'admin.dashboardEdit.addService' | translate }}</h3></div>
         <div class="card-body">
           <div class="row g-2 align-items-end">
             <div class="col-md-3">
-              <label class="form-label">Typ</label>
+              <label class="form-label">{{ 'admin.dashboardEdit.type' | translate }}</label>
               <select class="form-select" [(ngModel)]="attachKind">
-                <option value="proxy_host">NPM-Host</option>
-                <option value="guest">Proxmox-Gast</option>
-                <option value="custom_service">Eigener Dienst</option>
+                <option value="proxy_host">{{ 'admin.dashboardEdit.npmHost' | translate }}</option>
+                <option value="guest">{{ 'admin.dashboardEdit.proxmoxGuest' | translate }}</option>
+                <option value="custom_service">{{ 'admin.dashboardEdit.customService' | translate }}</option>
               </select>
             </div>
             <div class="col-md-5">
-              <label class="form-label">Dienst</label>
+              <label class="form-label">{{ 'admin.dashboardEdit.service' | translate }}</label>
               <select class="form-select" [(ngModel)]="attachId">
-                <option [ngValue]="null">— auswählen —</option>
+                <option [ngValue]="null">{{ 'admin.dashboardEdit.choose' | translate }}</option>
                 @for (svc of availableServices(); track svc.kind + svc.id) {
                   @if (svc.kind === attachKind) {
                     <option [ngValue]="svc.id">{{ svc.label }}</option>
@@ -61,7 +61,7 @@
                 (click)="attach()"
                 [disabled]="attachId == null"
               >
-                Hinzufügen
+                {{ 'admin.dashboardEdit.add' | translate }}
               </button>
             </div>
           </div>
@@ -70,12 +70,12 @@
 
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Reihenfolge &amp; Sichtbarkeit</h3>
+          <h3 class="card-title">{{ 'admin.dashboardEdit.orderVisibility' | translate }}</h3>
           <span class="text-secondary small">
-            Logo, Name und URL werden unter Einstellungen → Dienste konfiguriert.
+            {{ 'admin.dashboardEdit.configuredElsewhere' | translate }}
           </span>
           @if (saving()) {
-            <span class="text-secondary small ms-auto">Speichern …</span>
+            <span class="text-secondary small ms-auto">{{ 'admin.dashboardEdit.saving' | translate }}</span>
           }
         </div>
         <div class="list-group list-group-flush" cdkDropList (cdkDropListDropped)="drop($event)">
@@ -92,7 +92,7 @@
                 [ngModel]="item.category_id ?? ''"
                 (ngModelChange)="setCategory(item, $event)"
               >
-                <option value="">keine Kategorie</option>
+                <option value="">{{ 'admin.dashboardEdit.noCategory' | translate }}</option>
                 @for (category of categories(); track category.id) {
                   <option [value]="category.id">{{ category.name }}</option>
                 }
@@ -105,11 +105,11 @@
                   [checked]="item.visible"
                   (change)="toggleVisible(item)"
                 />
-                <label class="form-check-label">sichtbar</label>
+                <label class="form-check-label">{{ 'admin.dashboardEdit.visible' | translate }}</label>
               </div>
             </div>
           } @empty {
-            <div class="list-group-item text-secondary">Noch keine Dienste auf diesem Dashboard.</div>
+            <div class="list-group-item text-secondary">{{ 'admin.dashboardEdit.noneYet' | translate }}</div>
           }
         </div>
       </div>

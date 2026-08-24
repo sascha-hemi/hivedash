@@ -53,4 +53,24 @@ export class AuthService {
   clearUser(): void {
     this._user.set(null);
   }
+
+  /** Called by LocaleService after PATCH /api/auth/me - updates the in-memory user without a
+   * full re-fetch, so e.g. isAdmin() and everything else on the signal stays exactly as it was. */
+  setUserLocale(locale: string | null): void {
+    const current = this._user();
+    if (current) {
+      this._user.set({ ...current, locale });
+    }
+  }
+
+  /** Self-service password change (see account.ts) - rejected server-side with 400 for an
+   * OIDC-provisioned account (has_password false) and 401 if currentPassword is wrong. */
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await firstValueFrom(
+      this.http.patch<CurrentUser>('/api/auth/me', {
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+    );
+  }
 }

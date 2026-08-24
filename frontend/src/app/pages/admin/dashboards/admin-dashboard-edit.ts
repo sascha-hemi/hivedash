@@ -2,18 +2,20 @@ import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } fro
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../../core/admin.service';
 import { AdminDashboard, AdminDashboardItem, AvailableService, Category, TileSize } from '../../../core/models';
 
 @Component({
   selector: 'app-admin-dashboard-edit',
-  imports: [FormsModule, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [FormsModule, CdkDropList, CdkDrag, CdkDragHandle, TranslatePipe],
   templateUrl: './admin-dashboard-edit.html',
 })
 export class AdminDashboardEditPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly admin = inject(AdminService);
+  private readonly translate = inject(TranslateService);
 
   dashboardId = 0;
   readonly dashboard = signal<AdminDashboard | null>(null);
@@ -57,7 +59,7 @@ export class AdminDashboardEditPage implements OnInit {
       await this.admin.renameDashboard(this.dashboardId, name);
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Umbenennen fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.dashboardEdit.renameFailed')));
     } finally {
       this.savingSettings.set(false);
     }
@@ -69,7 +71,7 @@ export class AdminDashboardEditPage implements OnInit {
       const dashboard = await this.admin.setTileSize(this.dashboardId, tileSize as TileSize);
       this.dashboard.set(dashboard);
     } catch (err) {
-      this.error.set(this.extractError(err, 'Kachelgröße ändern fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.dashboardEdit.tileSizeFailed')));
     } finally {
       this.savingSettings.set(false);
     }
@@ -88,7 +90,7 @@ export class AdminDashboardEditPage implements OnInit {
         ]),
       );
     } catch (err) {
-      this.error.set(this.extractError(err, 'Kategorie-Zuordnung fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.dashboardEdit.categoryAssignFailed')));
     }
   }
 
@@ -130,7 +132,7 @@ export class AdminDashboardEditPage implements OnInit {
       this.attachId = null;
       await this.reload();
     } catch (err) {
-      this.error.set(this.extractError(err, 'Hinzufügen fehlgeschlagen.'));
+      this.error.set(this.extractError(err, this.translate.instant('admin.dashboardEdit.addFailed')));
     }
   }
 }

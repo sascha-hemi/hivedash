@@ -42,6 +42,11 @@ class User(Base):
     dashboard_id: Mapped[int | None] = mapped_column(
         ForeignKey("dashboards.id", ondelete="SET NULL"), default=None
     )
+    # Explicit UI language choice ("de", "en", ...) - NULL means "never chosen, keep
+    # auto-detecting from the browser on every load" (see core/locale.service.ts). Deliberately
+    # a self-service field: a user sets their own via PATCH /api/auth/me, independent of
+    # everything else on this row that only an admin can touch via /api/admin/users.
+    locale: Mapped[str | None] = mapped_column(default=None)
     created_at: Mapped[datetime] = mapped_column(default=_utcnow)
 
     dashboard: Mapped["Dashboard | None"] = relationship(back_populates="users")

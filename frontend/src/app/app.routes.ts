@@ -14,6 +14,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/dashboard/dashboard').then((m) => m.DashboardPage),
   },
   {
+    path: 'account',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/account/account').then((m) => m.AccountPage),
+  },
+  {
     path: 'admin',
     canActivate: [adminGuard],
     loadComponent: () => import('./pages/admin/admin-shell').then((m) => m.AdminShell),

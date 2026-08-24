@@ -96,7 +96,6 @@ async def _build_dashboard_payload(session: AsyncSession, user: User) -> dict:
     view = apply_dashboard_overrides(merged, items, categories)
 
     return {
-        "title": settings.dashboard_title,
         "generated_at": state["generated_at"],
         # the fallback HTTP-polling cadence a client falls back to if the websocket connection
         # can't be established/stays down - deliberately the faster (Proxmox) interval, since
@@ -181,7 +180,7 @@ async def lifespan(_: FastAPI):
     proxmox_task.cancel()
 
 
-app = FastAPI(title=settings.dashboard_title, lifespan=lifespan)
+app = FastAPI(title="HiveDash", lifespan=lifespan)
 
 # Holds only the transient OIDC state/nonce during the login redirect round-trip - not the app's
 # own login session, which is DB-backed (see app/auth/routes.py, app/db/models.Session).

@@ -17,9 +17,11 @@ export function statusDotClass(status: string | boolean | null | undefined): str
   return 'bg-secondary';
 }
 
-export function statusDotTitle(status: boolean | null | undefined): string {
-  if (status === null || status === undefined) return 'Status unbekannt';
-  return status ? 'online' : 'offline';
+/** Returns an i18n key, not display text directly - callers pipe it through `translate` in the
+ * template (e.g. `[title]="dotTitleKey | translate"`). */
+export function statusDotTitleKey(status: boolean | null | undefined): string {
+  if (status === null || status === undefined) return 'tile.statusUnknown';
+  return status ? 'tile.online' : 'tile.offline';
 }
 
 /** Fallback avatar for a service/guest with no logo assigned - deterministic per name so a tile
