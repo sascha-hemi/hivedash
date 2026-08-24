@@ -28,7 +28,7 @@ an admin can create additional dashboards and curate visibility/order/display-na
 per dashboard, and assign users to one. The frontend is an Angular SPA styled with
 [Tabler](https://github.com/tabler/tabler).
 
-Read `README.md` (German) for full setup/credentials instructions.
+Read `README.md` for full setup/credentials instructions.
 
 ## Commands
 

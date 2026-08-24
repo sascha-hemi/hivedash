@@ -1,139 +1,166 @@
 # HiveDash
 
-Ein selbst gebautes, minimalistisches Homepage/Homarr-artiges Dashboard, das sich
-**automatisch** um Dienste erweitert:
+![CI](https://github.com/sascha-hemi/hivedash/actions/workflows/ci.yml/badge.svg)
 
-- **Nginx Proxy Manager**: alle konfigurierten Proxy-Hosts werden per API abgefragt
-  und als klickbare Kacheln (mit Domain, online/offline-Status) angezeigt.
-- **Proxmox VE**: alle VMs und LXC-Container werden per API abgefragt (Name, Status,
-  CPU/RAM). Wo möglich wird ein Proxmox-Gast automatisch einem NPM-Proxy-Host
-  zugeordnet (per IP-Abgleich) und als eine gemeinsame Kachel mit Live-Stats
-  dargestellt. Alles, was sich nicht eindeutig zuordnen lässt, wird trotzdem
-  angezeigt (als reiner Link bzw. als reine Infrastruktur-Kachel) - nichts wird
-  stillschweigend unterschlagen.
+A self-hosted, multi-user dashboard for your homelab that **auto-discovers** services -
+no manual YAML per service, no keeping a config file in sync with what's actually running.
 
-Kein manuelles YAML pro Dienst nötig: Ein neuer Proxy-Host in NPM oder eine neue
-VM/LXC in Proxmox taucht nach dem nächsten Poll-Intervall automatisch auf.
+![HiveDash screenshot](docs/screenshot.png)
 
-Mehrbenutzerfähig: jeder Login sieht standardmäßig dasselbe (automatisch gepflegte)
-Standard-Dashboard, ein Admin kann aber zusätzliche Dashboards anlegen und darauf
-Sichtbarkeit/Reihenfolge/Anzeigename einzelner Dienste pro Dashboard anpassen - und
-einzelnen Nutzern eines davon zuweisen.
+- **Nginx Proxy Manager**: every configured proxy host is fetched via its API and shown as
+  a clickable tile, with domain and live online/offline status.
+- **Proxmox VE**: every VM and LXC container is fetched via its API (name, status, CPU/RAM).
+  Where possible, a Proxmox guest is automatically matched to its Nginx Proxy Manager host
+  (by IP, or by hostname if the proxy points at a hostname instead of a raw IP) and shown as
+  one combined tile with live stats. Anything that can't be matched is still shown - as a
+  plain link (an unmatched proxy host) or a bare infrastructure tile (an unmatched guest) -
+  nothing is ever silently dropped.
 
-Jeder Dienst bekommt außerdem automatisch ein Logo zugeordnet, sobald eines mit
-passendem Stichwort in der Logo-Bibliothek hinterlegt ist (`/admin/logos`) - entweder
-selbst hochgeladen oder gezielt aus dem offenen Icon-Katalog
-[dashboard-icons](https://github.com/homarr-labs/dashboard-icons) importiert. Eine
-manuelle Korrektur pro Dienst ist im Dashboard-Editor jederzeit möglich.
+A new proxy host in NPM or a new VM/LXC in Proxmox just shows up automatically after the
+next poll interval - nothing to configure per service.
 
-## Funktionsweise
+Multi-user: every login sees the same auto-maintained default dashboard by default, but an
+admin can create additional dashboards and curate per-dashboard visibility, order, category
+and display name for each service - and assign individual users to one of them.
 
-Ein FastAPI-Backend pollt beide APIs unabhängig voneinander im Hintergrund - NPM alle
-`NPM_POLL_INTERVAL_SECONDS` (Default: 60s, ändert sich selten), Proxmox alle
-`PROXMOX_POLL_INTERVAL_SECONDS` (Default: 5s, für zeitnahe CPU/RAM-Werte) - und schreibt
-das Ergebnis in eine SQLite-Datenbank (statt nur in den Prozessspeicher) - ein Neustart
-des Containers verliert also keine Daten, und ein kurzzeitiger NPM/Proxmox-Ausfall lässt
-die zuletzt bekannten Dienste weiter sichtbar (nur die Fehlermeldung ändert sich). Das
-Frontend ist eine Angular-SPA (gestylt mit [Tabler](https://github.com/tabler/tabler)):
-sobald ein Poll durchgelaufen ist, schiebt das Backend die aktualisierten Daten per
-WebSocket (`/api/ws/dashboard`) direkt an alle offenen Dashboards - kein Warten auf den
-nächsten Reload. Ein regelmäßiger HTTP-Fallback-Check bleibt bestehen, falls die
-WebSocket-Verbindung (z. B. durch einen Proxy ohne Upgrade-Unterstützung) nicht zustande
-kommt. Login/Session/Admin-Verwaltung laufen über dieselbe FastAPI-API.
+Every service also gets a logo automatically, as soon as a matching keyword is found in the
+logo library (`/admin/logos`) - either uploaded manually or imported on demand from the open
+[dashboard-icons](https://github.com/homarr-labs/dashboard-icons) catalog. A manual override
+per service is always available in the admin UI.
+
+The UI ships in English, German, Dutch, Spanish and French, auto-detected from the browser;
+any user can override it manually, and the choice is saved to their account.
+
+## How it works
+
+A FastAPI backend polls both APIs independently in the background - NPM every
+`NPM_POLL_INTERVAL_SECONDS` (default: 60s, rarely changes) and Proxmox every
+`PROXMOX_POLL_INTERVAL_SECONDS` (default: 5s, for near-live CPU/RAM values) - and persists
+the result into a SQLite database (not just process memory), so a container restart never
+loses data, and a transient NPM/Proxmox outage just leaves the last-known-good services
+visible (only the error banner changes). The frontend is an Angular SPA (styled with
+[Tabler](https://github.com/tabler/tabler)): as soon as a poll completes, the backend pushes
+the updated data straight to every open dashboard over WebSocket (`/api/ws/dashboard`) - no
+waiting for the next reload. A periodic HTTP fallback check stays in place in case the
+WebSocket connection can't be established (e.g. behind a proxy without upgrade support).
+Login/session/admin management all run through the same FastAPI API.
 
 ### Login
 
-- **Lokal**: E-Mail/Passwort, von einem Admin angelegt (siehe `POST /api/admin/users`
-  bzw. die Admin-Oberfläche unter `/admin/users`). Es gibt bewusst keine
-  Selbstregistrierung.
-- **OIDC/SSO** (optional): gegen einen beliebigen OIDC-Provider (z. B. eine eigene
-  Authentik-Instanz) - siehe `OIDC_*`/`PUBLIC_BASE_URL` in `.env.example`. Der erste
-  Login überhaupt (egal ob lokal oder per OIDC) wird automatisch Admin, damit es nie
-  zu einem "keiner kann sich mehr einloggen"-Zustand kommen kann.
+- **Local**: email/password, created by an admin (see `POST /api/admin/users` or the admin
+  UI under `/admin/users`). There is deliberately no self-registration.
+- **OIDC/SSO** (optional): against any OIDC provider (e.g. your own Authentik instance) -
+  see `OIDC_*`/`PUBLIC_BASE_URL` in `.env.example`. The very first login ever (local or via
+  OIDC) automatically becomes admin, so you can never end up in a "nobody can log in
+  anymore" state.
 
-### Zuordnungslogik (NPM ↔ Proxmox)
+### Matching logic (NPM ↔ Proxmox)
 
-Der `forward_host` eines NPM-Proxy-Hosts wird mit den bekannten IP-Adressen aller
-laufenden Proxmox-Gäste verglichen:
+A NPM proxy host's `forward_host` is compared against the known IP addresses of every
+running Proxmox guest:
 
-- **QEMU-VMs**: IP kommt vom `qemu-guest-agent` - der muss in der VM installiert
-  und aktiv sein, sonst bleibt die IP unbekannt und es gibt keine Zuordnung
-  (der Dienst wird trotzdem ganz normal als Link angezeigt).
-- **LXC-Container**: IP kommt vom Proxmox-Interfaces-Endpunkt, funktioniert ohne
-  Zusatz-Software.
-- Zeigt `forward_host` direkt auf eine IP, die zu einem Docker-Container *innerhalb*
-  einer VM/eines LXC gehört (typisches Setup), matcht das trotzdem auf den
-  VM/LXC-Host, da dessen IP identisch mit der des Docker-Host-Netzwerks ist -
-  bei `network_mode: host` oder Makvlan-Setups funktioniert das gut, bei
-  Docker-Bridge-Networking mit eigener Container-IP nicht (dann bleibt der
-  Dienst unzugeordnet, aber sichtbar).
+- **QEMU VMs**: the IP comes from the `qemu-guest-agent` - it has to be installed and
+  running inside the VM, otherwise the IP stays unknown and there's no match (the service
+  is still shown normally, as a plain link).
+- **LXC containers**: the IP comes from Proxmox's interfaces endpoint, no extra software
+  needed.
+- If `forward_host` points directly at an IP that actually belongs to a Docker container
+  *inside* a VM/LXC (a common setup), it still matches the VM/LXC host, since its IP is
+  identical to the Docker host network's IP - this works well with `network_mode: host` or
+  macvlan setups, but not with Docker bridge networking and its own container IP (the
+  service then stays unmatched, but visible).
+- As a fallback, if no IP matches, the proxy host's `forward_host` is compared
+  case-insensitively against the guest's own name - covers a proxy host configured with a
+  hostname instead of a raw IP.
 
-## Setup
+## Installation
 
-### 1. Zugangsdaten anlegen (mit minimalen Rechten)
+Pick whichever fits your setup - all three run the exact same application.
 
-**Nginx Proxy Manager**: Users -> Add User, eigener Nutzer nur für dieses
-Dashboard. Unter "Permissions" beim neuen User "Proxy Hosts" (und die anderen
-Bereiche, die du nicht brauchst) auf **View Only** statt Manage stellen - dann
-kann der Dashboard-Nutzer nichts an eurer Konfiguration ändern, nur lesen.
+### Option 1: Docker (recommended)
 
-**Proxmox VE**: Datacenter -> Permissions -> API Tokens -> Add.
-- User z. B. `root@pam` (oder besser: einen eigenen, unprivilegierten User anlegen)
-- Token-ID z. B. `dashboard`
-- "Privilege Separation" **aktiviert** lassen
-- danach unter Datacenter -> Permissions -> Add -> API Token Permission:
-  Path `/`, Token `user@realm!dashboard`, Role `PVEAuditor` (rein lesend) hinzufügen
+1. **Create credentials with minimal privileges:**
 
-Damit hat das Dashboard nur Lesezugriff auf Proxmox.
+   **Nginx Proxy Manager**: Users -> Add User, a dedicated user just for this dashboard.
+   Under "Permissions", set "Proxy Hosts" (and any other section you don't need) to
+   **View Only** instead of Manage - the dashboard user can then read your configuration
+   but never change it.
 
-### 2. Konfigurieren
+   **Proxmox VE**: Datacenter -> Permissions -> API Tokens -> Add.
+   - User e.g. `root@pam` (or better: create your own unprivileged user)
+   - Token ID e.g. `dashboard`
+   - Leave "Privilege Separation" **enabled**
+   - Then under Datacenter -> Permissions -> Add -> API Token Permission: add path `/`,
+     token `user@realm!dashboard`, role `PVEAuditor` (read-only)
+
+   This gives the dashboard read-only access to Proxmox.
+
+2. **Configure:**
+
+   ```bash
+   cp .env.example .env
+   # fill .env with your real values
+   ```
+
+   In addition to NPM/Proxmox, make sure to set:
+   - `COOKIE_SECRET`: a random string, e.g.
+     `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`.
+   - `BOOTSTRAP_ADMIN_EMAIL`/`BOOTSTRAP_ADMIN_PASSWORD`: creates this admin account on the
+     very first start (while no user exists yet). Create further users afterward through
+     the admin UI (`/admin/users`).
+   - `PUBLIC_BASE_URL`: the externally reachable URL of the dashboard (worth setting even
+     without OIDC). Only needed for OIDC: `OIDC_ISSUER`/`OIDC_CLIENT_ID`/`OIDC_CLIENT_SECRET`
+     - otherwise leave all three blank to keep SSO disabled.
+
+3. **Start:**
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+   The dashboard is then reachable at `http://<server>:8081`.
+
+4. **Verify:**
+
+   ```bash
+   curl http://localhost:8081/api/health
+   curl http://localhost:8081/api/dashboard | jq .
+   ```
+
+   If something's wrong: `docker compose logs -f` - NPM and Proxmox errors show up there in
+   plain language (e.g. 401 on a wrong password/token) and are also surfaced right on the
+   dashboard page itself as an error banner, instead of leaving the page blank.
+
+### Option 2: Proxmox VE Community Script
+
+HiveDash is being submitted as an app script to
+[community-scripts/ProxmoxVE](https://github.com/community-scripts/ProxmoxVE) - see
+[`contrib/proxmoxve/`](contrib/proxmoxve/) for the install scripts and submission status.
+Once merged, installing it will be a single command from their site, exactly like any other
+community script - a fresh Debian LXC, Node.js/Python installed automatically, systemd
+service set up, ready to go.
+
+### Option 3: Standalone Proxmox LXC/VM install (works right now)
+
+Don't want to wait for the community-scripts merge, or prefer a native install without
+Docker? [`contrib/proxmoxve/standalone-install.sh`](contrib/proxmoxve/standalone-install.sh)
+does the same install (Node.js for the one-time frontend build, Python venv, Alembic
+migrations, systemd service) as a single self-contained script, no dependency on the
+community-scripts project at all:
 
 ```bash
-cp .env.example .env
-# .env mit deinen echten Werten befüllen
+# Inside a fresh Debian 12/13 LXC or VM (create it via the Proxmox UI first), run as root.
+# A minimal Debian LXC template ships with neither curl nor wget, and this one-liner needs
+# curl just to fetch itself, so install that first:
+apt update && apt install -y curl
+
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/sascha-hemi/hivedash/main/contrib/proxmoxve/standalone-install.sh)"
 ```
 
-Zusätzlich zu NPM/Proxmox unbedingt ausfüllen:
-- `COOKIE_SECRET`: zufälliger String, z. B.
-  `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`.
-- `BOOTSTRAP_ADMIN_EMAIL`/`BOOTSTRAP_ADMIN_PASSWORD`: legt beim allerersten Start
-  (wenn noch kein Nutzer existiert) diesen Admin-Account an. Weitere Nutzer danach
-  über die Admin-Oberfläche (`/admin/users`) anlegen.
-- `PUBLIC_BASE_URL`: die von außen erreichbare URL des Dashboards (auch ohne OIDC
-  sinnvoll zu setzen). Nur nötig für OIDC: `OIDC_ISSUER`/`OIDC_CLIENT_ID`/
-  `OIDC_CLIENT_SECRET` - sonst alle drei leer lassen, dann bleibt SSO deaktiviert.
+Verified end to end against a real, fresh Debian 13 container: release fetch, Angular
+build, Python venv + pip install, and the Alembic migration all run clean, and the app
+answers `/api/health` right after `systemctl enable --now hivedash`.
 
-### 3. Starten
-
-```bash
-docker compose up -d --build
-```
-
-Dashboard ist danach unter `http://<server>:8080` erreichbar.
-
-### 4. Testen
-
-```bash
-curl http://localhost:8080/api/health
-curl http://localhost:8080/api/dashboard | jq .
-```
-
-Bei Problemen: `docker compose logs -f` - NPM- und Proxmox-Fehler landen dort
-verständlich (z. B. 401 bei falschem Passwort/Token) und werden zusätzlich unten
-auf der Dashboard-Seite selbst als Fehlertext eingeblendet, statt die Seite leer
-zu lassen.
-
-## Grenzen / bewusste Vereinfachungen
-
-- Der Katalog-Import unter `/admin/logos` braucht Internetzugriff *nur in dem Moment*,
-  in dem ein Admin aktiv sucht/importiert - Polling und laufender Betrieb sind davon
-  komplett unabhängig und funktionieren auch offline.
-- Es werden nur NPM **Proxy Hosts** ausgelesen, keine Redirection Hosts oder
-  Streams - lässt sich in `app/clients/npm.py` ergänzen, falls gewünscht.
-- Die NPM-Poll-Frequenz ist bewusst niedrig (60s) gehalten, um NPM nicht unnötig zu
-  belasten; Proxmox pollt standardmäßig alle 5s für zeitnahe CPU/RAM-Werte. Beides über
-  `NPM_POLL_INTERVAL_SECONDS`/`PROXMOX_POLL_INTERVAL_SECONDS` anpassbar.
-- Kein Self-Service-Passwort-Reset (kein SMTP im Projekt) - ein Admin muss ein neues
-  Passwort über `/admin/users` setzen.
-- Nur ein OIDC-Provider gleichzeitig konfigurierbar (Schema erlaubt mehrere, es fehlt
-  nur die Konfigurationsoberfläche dafür).
+Then continue with steps 1-2 from the Docker section above (credentials + `.env`) - the
+installer generates `/opt/hivedash_data/hivedash.env` for you with a fresh cookie secret and
+bootstrap admin password already filled in; just add your NPM/Proxmox values.
