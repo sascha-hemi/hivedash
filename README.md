@@ -168,3 +168,9 @@ answers `/api/health` right after `systemctl enable --now hivedash`.
 Then continue with steps 1-2 from the Docker section above (credentials + `.env`) - the
 installer generates `/opt/hivedash_data/hivedash.env` for you with a fresh cookie secret and
 bootstrap admin password already filled in; just add your NPM/Proxmox values.
+
+**Updating**: run the exact same command again. The script detects the existing
+`/opt/hivedash_data/hivedash.env`, fetches the latest release, rebuilds the app in place, and
+runs any new Alembic migrations - your config and SQLite database are left untouched. Pin a
+specific version instead of the latest by prefixing the command with
+`HIVEDASH_VERSION=v1.2.3`.

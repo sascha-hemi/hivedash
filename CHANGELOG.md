@@ -5,6 +5,8 @@ All notable changes to HiveDash are documented here. Format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-28
+
 ### Added
 
 - Search bar on the dashboard for external search engines (Google, Bing, DuckDuckGo, Startpage,
